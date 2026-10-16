@@ -87,22 +87,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function mediaBodyHTML(product, state, id) {
     const d = fxDelay(id);
     if (state === 'paused') {
+      // ປິດປັບປຸງ: ວົງໄອຄອນຂາວ + ເຟືອງໝູນຊ້າໆ + ວົງ spinner ບາງໆ + ແຖບໂຫລດ (ມິນິມອນ)
+      const note = product.paused_note ? escapeHtml(product.paused_note) : 'ກຳລັງສ້ອມແປງ';
       return `
-        <div class="paused-icon">
-          <div class="gear" style="animation-delay:${d}s;">${GEAR_SVG}</div>
-          <div class="wrench" style="animation-delay:${d * 0.4}s;">${WRENCH_SVG}</div>
-        </div>
-        <div class="paused-title">ປັບປຸງ / ລໍຖ້າອັບເດດ</div>
-        <div class="paused-sub">${product.paused_note ? escapeHtml(product.paused_note) : 'ກຳລັງສ້ອມແປງ..'}</div>
-        <div class="paused-bar"><i style="animation-delay:${d}s;"></i></div>`;
+        <div class="st-stage">
+          <div class="st-icon"><i class="st-spin" style="animation-delay:${d}s"></i><div class="st-glyph st-gear">${GEAR_SVG}</div></div>
+          <div class="st-title">ປັບປຸງ / ລໍຖ້າອັບເດດ</div>
+          <div class="st-sub">${note}</div>
+          <div class="st-bar"><i style="animation-delay:${d}s"></i></div>
+        </div>`;
     }
     if (state === 'soldout') {
+      // ສິນຄ້າໝົດ: ວົງໄອຄອນກະແຈລັອກ + ວົງແດງແຜ່ເບົາໆ + ແສງກວາດບາງໆ (ມິນິມອນ)
       return `
-        <div class="soldout-ribbon"><span>SOLD OUT</span></div>
-        <div class="soldout-wrap">
-          ${LOCK_SVG}
-          <div class="soldout-title">ໝົດແລ້ວ</div>
-          <div class="soldout-sub">ລໍຖ້າຮອບຕໍ່ໄປ</div>
+        <div class="st-sheen" aria-hidden="true"></div>
+        <div class="st-stage">
+          <div class="st-icon"><i class="st-ring" style="animation-delay:${d}s"></i><div class="st-glyph st-lock">${LOCK_SVG}</div></div>
+          <div class="st-title">ໝົດແລ້ວ</div>
+          <div class="st-sub so"><i></i>ລໍຖ້າຮອບຕໍ່ໄປ</div>
         </div>`;
     }
     return mediaHTML(product);
@@ -151,10 +153,28 @@ document.addEventListener('DOMContentLoaded', () => {
     return topId;
   }
 
+  // ໄອຄອນໄຟແບບມີອນິເມຊັນ (3 ຊັ້ນ: ເປວນອກ/ເປວກາງ/ແກນ + ປະກາຍໄຟລອຍຂຶ້ນ) — SVG + CSS ລ້ວນ
+  // ອນິເມຊັນຢູ່ໃນ theme.css (.fire-ico). delay = ໃຫ້ແຕ່ລະກາດໄຟຂະຫຍັບບໍ່ພ້ອມກັນ
+  function fireIconHTML(delay, active) {
+    return `<svg class="fire-ico${active ? '' : ' is-off'}" viewBox="0 0 24 24" aria-hidden="true" style="--fd:${delay}s">
+      <g class="fire-flame">
+        <path class="fire-outer" d="M12 2c.8 3.4 6 6 6 12a6 6 0 0 1-12 0c0-2.2 1-3.8 2.2-5.2.2 1.6 1 2.4 1.8 2.4C10.4 8.4 10.6 4.6 12 2Z"/>
+        <path class="fire-mid" d="M12 9.5c.6 2.2 3.4 3.4 3.4 6.5a3.4 3.4 0 0 1-6.8 0c0-1.3.6-2.2 1.4-3 .2.9.7 1.3 1.2 1.3.4-1.1.2-3.1.8-4.8Z"/>
+        <path class="fire-core" d="M12 14c.4 1 1.5 1.6 1.5 2.9a1.5 1.5 0 0 1-3 0c0-.9.5-1.4.9-1.9.2.4.4.5.6.5Z"/>
+      </g>
+      <circle class="fire-spark s1" cx="9" cy="6" r="0.9"/>
+      <circle class="fire-spark s2" cx="15.5" cy="7" r="0.7"/>
+      <circle class="fire-spark s3" cx="12" cy="4" r="0.6"/>
+    </svg>`;
+  }
+
+  // ປ້າຍ "ຂາຍແລ້ວ N ອັນ" ໃຕ້ປຸ່ມຊື້ເລີຍ — N = soldCount ຈິງຈາກ /api/public/storefront
+  // (ນັບຈາກ orders ທີ່ status = completed ຂອງສິນຄ້າຊື່ດຽວກັນ). ສະແດງທຸກກາດ ເພື່ອໃຫ້ຄວາມສູງກາດເທົ່າກັນ:
+  // ຂາຍແລ້ວ > 0 ໄຟລຸກ, ຍັງເປັນ 0 ໄຟມອດ (ສີເທົາ ບໍ່ຂະຫຍັບ)
   function soldTagHTML(product) {
-    const count = Number(product.soldCount) || 0;
-    if (count <= 0) return '';
-    return `<div class="prod-sold-tag">${FLAME_SVG}ຂາຍແລ້ວ ${count.toLocaleString('en-US')} ອັນ</div>`;
+    const count = Math.max(0, Number(product.soldCount) || 0);
+    const active = count > 0;
+    return `<div class="prod-sold-tag${active ? '' : ' is-zero'}" style="--fd:${fxDelay(product.id)}s">${fireIconHTML(fxDelay(product.id), active)}<span class="sold-txt">ຂາຍແລ້ວ <b class="sold-num">${count.toLocaleString('en-US')}</b></span></div>`;
   }
 
   function cardHTML(product, topSellerId) {
