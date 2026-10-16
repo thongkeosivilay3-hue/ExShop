@@ -12,11 +12,13 @@
 <link rel="stylesheet" href="page-transition.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Noto+Sans+Lao+Looped:wght@600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Noto+Sans+Lao+Looped:wght@600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet"></noscript>
 
 <link href="theme.css?v=20261016a" rel="stylesheet"/>
 <link href="profile-fx.css?v=20261017a" rel="stylesheet"/>
+<link href="profile-redesign.css?v=20261017a" rel="stylesheet"/>
+<meta name="theme-color" content="#f3f8fd"/>
 </head>
 <body class="p-body">
 <div class="shell">
@@ -39,7 +41,7 @@
     <button type="button" class="p-back" data-nav-href="index.html" aria-label="ກັບໜ້າຫຼັກ">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h1 class="display-lo">ໂປຣໄຟລ໌</h1>
+    <div class="p-title"><h1 class="display-lo">ໂປຣໄຟລ໌</h1><p class="p-sub">ຈັດການບັນຊີ ແລະ ຂໍ້ມູນຂອງທ່ານ</p></div>
   </div>
 
   <div class="p-loading" id="pLoading">ກຳລັງໂຫຼດ...</div>
@@ -48,6 +50,7 @@
 
     <!-- ===== Hero: รูป + ชื่อ ===== -->
     <section class="p-card p-hero">
+      <div class="p-cover" aria-hidden="true"><i></i></div>
       <div class="p-avatar-wrap">
         <div class="p-avatar" id="pAvatarBox"></div>
         <button type="button" class="p-avatar-cam" id="pAvatarEditBtn" aria-label="ປ່ຽນຮູບໂປຣໄຟລ໌">
@@ -74,12 +77,15 @@
       <div class="p-stat wide">
         <span>ຍອດເງິນ</span>
         <b id="pStatBalance">0<span class="unit"> ₭</span></b>
+        <a class="p-stat-cta" href="topup.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>ເຕີມເງິນ</a>
       </div>
       <div class="p-stat">
+        <em class="p-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg></em>
         <span>ຄຳສັ່ງຊື້</span>
         <b id="pStatOrders">0</b>
       </div>
       <div class="p-stat">
+        <em class="p-stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></em>
         <span>ໃຊ້ຈ່າຍແລ້ວ</span>
         <b id="pStatSpent">0<span class="unit"> ₭</span></b>
       </div>
@@ -170,5 +176,6 @@
 <script src="profile.js"></script>
 
 <script src="theme.js?v=20261016a"></script>
+<script src="profile-redesign.js?v=20261017a"></script>
 </body>
 </html>
