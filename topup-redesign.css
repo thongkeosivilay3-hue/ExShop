@@ -1,0 +1,407 @@
+/* =========================================================
+   topup-redesign.css  —  ดีไซน์ใหม่หน้าเติมเงิน (topup.html)
+   โหลดท้ายสุด ทับของเดิมทั้งหมด โดยไม่แตะ ID / class ที่ topup.js ใช้
+   ธีม: ฟ้าอ่อน + ขาว + เทา  |  แอนิเมชันใช้เฉพาะ transform / opacity (ลื่น ไม่กระตุก)
+   ========================================================= */
+
+html body .topup-main{
+  --tu-red:#2f9be8;
+  --tu-amber:#f2a516;
+  --tu-danger:#e5484d;
+  --tu-font-display:'Noto Sans Lao Looped','Noto Sans Lao',sans-serif;
+  --tu-font-num:'Sora','Noto Sans Lao',sans-serif;
+  --tu-ease:cubic-bezier(.22,1,.36,1);
+  --tu-spring:cubic-bezier(.34,1.56,.64,1);
+  padding:12px 18px 48px;
+}
+html body .topup-main::before{ display:none; }
+html body .topup-main :focus-visible{ outline:3px solid rgba(47,155,232,.55); outline-offset:3px; }
+
+/* ---------------------------------------------------------
+   Stepper  1 → 2 → 3
+   --------------------------------------------------------- */
+.tu-steps{
+  list-style:none; margin:0 4px 24px; padding:0; position:relative;
+  display:grid; grid-template-columns:repeat(3,1fr);
+}
+.tu-steps::before,.tu-steps::after{
+  content:""; position:absolute; top:15px; left:16.667%; right:16.667%; height:3px; border-radius:3px;
+}
+.tu-steps::before{ background:var(--gray-200); }
+.tu-steps::after{
+  background:linear-gradient(90deg,#46aef2,#1f86d6);
+  transform-origin:left center; transform:scaleX(var(--p,0));
+  transition:transform .9s var(--tu-ease);
+}
+.tu-steps[data-step="1"]{ --p:0; }
+.tu-steps[data-step="2"]{ --p:.5; }
+.tu-steps[data-step="3"]{ --p:1; }
+.tu-steps li{
+  position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:8px;
+  font-size:11.5px; font-weight:600; color:var(--text-faint); transition:color .4s;
+}
+.tu-steps li.is-current{ color:var(--sky-700); }
+.tu-steps li.is-done{ color:var(--ink); }
+.tu-steps .tu-dot{
+  position:relative; width:32px; height:32px; border-radius:50%; display:grid; place-items:center;
+  background:#fff; border:2px solid var(--gray-200); color:var(--text-faint);
+  font-family:var(--tu-font-num); font-size:12px; font-weight:700;
+  transition:background .5s var(--tu-ease),border-color .5s,color .5s,transform .5s var(--tu-spring);
+}
+.tu-steps .tu-dot svg{ width:15px; height:15px; display:none; }
+.tu-steps li.is-current .tu-dot{ border-color:var(--sky-500); color:var(--sky-700); transform:scale(1.08); }
+.tu-steps li.is-current .tu-dot::after{
+  content:""; position:absolute; inset:-2px; border-radius:50%; border:2px solid var(--sky-500);
+  animation:tuHalo 2.2s ease-out infinite;
+}
+.tu-steps li.is-done .tu-dot{ background:linear-gradient(135deg,#46aef2,#1f86d6); border-color:transparent; color:#fff; }
+.tu-steps li.is-done .tu-dot .n{ display:none; }
+.tu-steps li.is-done .tu-dot svg{ display:block; animation:tuPop .5s var(--tu-spring); }
+@keyframes tuHalo{ 0%{ transform:scale(1); opacity:.7; } 100%{ transform:scale(1.7); opacity:0; } }
+@keyframes tuPop{ from{ transform:scale(0) rotate(-30deg); } }
+
+/* ---------------------------------------------------------
+   Title row
+   --------------------------------------------------------- */
+html body .topup-title-row{ gap:14px; margin:0 0 22px; }
+html body .topup-back-btn{
+  position:relative; overflow:hidden; flex:0 0 auto; width:44px; height:44px; border-radius:50%;
+  background:#fff; border:1px solid var(--card-border); color:var(--sky-700); box-shadow:var(--shadow-s);
+  display:grid; place-items:center; transition:transform .4s var(--tu-spring),box-shadow .3s;
+}
+html body .topup-back-btn svg{ transition:transform .35s var(--tu-ease); }
+html body .topup-back-btn:hover svg{ transform:translateX(-3px); }
+html body .topup-back-btn:active{ transform:scale(.92); }
+.tu-title{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+html body .topup-title-row h1{
+  font-family:var(--tu-font-display); font-size:24px; font-weight:800; letter-spacing:0; line-height:1.2; color:var(--ink);
+}
+.tu-sub{ font-size:12.5px; color:var(--text-dim); line-height:1.5; }
+html body .topup-label{
+  font-size:13px; font-weight:700; color:var(--ink); letter-spacing:0; text-transform:none; margin:0 0 12px;
+}
+
+/* ---------------------------------------------------------
+   Method selector
+   --------------------------------------------------------- */
+html body .topup-methods{ grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+html body .topup-method{
+  position:relative; overflow:hidden; display:flex; align-items:center; gap:12px; text-align:left;
+  min-height:70px; padding:13px 40px 13px 13px; border-radius:18px;
+  background:#fff; border:1.5px solid var(--card-border); box-shadow:var(--shadow-s); color:var(--ink);
+  transition:transform .45s var(--tu-spring),border-color .3s,box-shadow .4s var(--tu-ease),background .3s;
+}
+html body .topup-method-icon{
+  flex:0 0 auto; width:42px; height:42px; border-radius:13px; display:grid; place-items:center;
+  background:var(--sky-50); color:var(--sky-700); border:1px solid var(--sky-100);
+}
+html body .topup-method-icon.has-logo{ background:#fff; padding:0; }
+html body .topup-method-name{ font-size:13px; font-weight:700; line-height:1.35; color:var(--ink); }
+html body .topup-method-sub{ font-size:10.5px; color:var(--green); margin-top:2px; font-weight:600; }
+html body .topup-method.active{
+  border-color:var(--sky-500); background:linear-gradient(160deg,#fff 0%,#eef6fd 100%);
+  box-shadow:0 0 0 4px rgba(47,155,232,.14),0 14px 28px -16px rgba(23,105,181,.45);
+}
+html body .topup-method-check{
+  position:absolute; top:50%; right:12px; width:22px; height:22px; margin-top:-11px; border-radius:50%;
+  background:linear-gradient(135deg,#46aef2,#1f86d6); color:#fff; align-items:center; justify-content:center;
+  box-shadow:0 6px 12px -4px rgba(31,134,214,.7);
+}
+html body .topup-method.active .topup-method-check{ display:flex; animation:tuPop .5s var(--tu-spring); }
+
+/* ---------------------------------------------------------
+   Main card  (bank head + wallet panel + presets + input)
+   --------------------------------------------------------- */
+html body .topup-card{
+  border-radius:26px; padding:20px; border:1px solid var(--card-border); background:#fff; box-shadow:var(--shadow-m);
+}
+html body .topup-card:not(.tuw-card)::before{ content:none; }
+html body .topup-card-head{ gap:13px; margin-bottom:16px; align-items:center; }
+html body .topup-card-icon{
+  flex:0 0 auto; width:46px; height:46px; border-radius:14px; display:grid; place-items:center;
+  background:#fff; border:1px solid var(--sky-100); box-shadow:var(--shadow-s);
+}
+html body .topup-card-head-text b{ font-size:14px; font-weight:800; color:var(--ink); margin-bottom:3px; }
+html body .topup-card-head-text p{ font-size:11.5px; line-height:1.6; color:var(--text-dim); }
+
+/* ---- Wallet panel: ยอดที่เลือก (จุดเด่นของหน้า) ---- */
+html body .topup-amount-summary{
+  position:relative; overflow:hidden; isolation:isolate; border-radius:22px; padding:20px 20px 22px; margin:0 0 18px;
+  color:#fff; text-align:left; border:0;
+  background:
+    repeating-radial-gradient(circle at 108% 120%, transparent 0 38px, rgba(255,255,255,.11) 39px 40px),
+    linear-gradient(150deg,#52b4f5 0%,#2492e3 48%,#1769b5 100%);
+  box-shadow:0 22px 40px -20px rgba(23,105,181,.85),inset 0 1px 0 rgba(255,255,255,.4);
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:transform .6s var(--tu-ease);
+  will-change:transform;
+}
+html body .topup-amount-summary::before{
+  content:""; position:absolute; z-index:-1; width:70%; height:220%; top:-60%; left:-40%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.38),transparent);
+  transform:translateX(-120%) skewX(-18deg);
+  animation:tuSheen 7s var(--tu-ease) 1.2s infinite;
+}
+html body .topup-amount-summary::after{
+  content:""; position:absolute; z-index:-1; inset:0; pointer-events:none;
+  background:radial-gradient(240px circle at var(--mx,80%) var(--my,0%),rgba(255,255,255,.32),transparent 65%);
+}
+@keyframes tuSheen{ 0%{ transform:translateX(-120%) skewX(-18deg); } 45%,100%{ transform:translateX(420%) skewX(-18deg); } }
+html body .topup-amount-summary .sum-label{
+  font-size:12.5px; font-weight:600; color:rgba(255,255,255,.86); letter-spacing:0; text-transform:none; margin-bottom:6px;
+}
+html body .topup-amount-summary .sum-value{
+  display:block; font-family:var(--tu-font-num); font-size:40px; font-weight:700; line-height:1.15; letter-spacing:-.02em;
+  color:#fff; font-variant-numeric:tabular-nums; text-shadow:0 2px 14px rgba(10,60,110,.28); transition:opacity .3s;
+}
+html body .topup-amount-summary .sum-value:not(.picked){ opacity:.7; }
+html body .topup-amount-summary .sum-value.picked{ color:#fff; text-shadow:0 2px 14px rgba(10,60,110,.28); }
+.tick{ animation:tuTick .5s var(--tu-ease); }
+@keyframes tuTick{ from{ opacity:0; transform:translateY(12px); filter:blur(5px); } }
+
+/* ---- Preset chips ---- */
+html body .topup-picker-wrap{ margin:0 0 18px; }
+html body .topup-picker-hint{
+  display:flex; align-items:center; justify-content:center; gap:6px; width:max-content; max-width:100%; margin:0 auto 14px;
+  padding:7px 14px; border-radius:999px; font-size:12px; font-weight:600; color:var(--sky-700);
+  background:var(--sky-50); border:1px solid var(--sky-100); overflow:hidden; max-height:40px;
+  transition:opacity .35s,max-height .45s var(--tu-ease),margin .45s var(--tu-ease),padding .45s var(--tu-ease),border-width .45s;
+}
+html body .topup-picker-hint.gone{ opacity:0; height:auto; max-height:0; margin-bottom:0; padding-block:0; border-width:0; }
+html body .topup-presets,
+html body .topup-presets.expanded{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:2px 0 4px; overflow:visible;
+}
+html body .topup-preset,
+html body .topup-preset.wide{
+  position:relative; overflow:hidden; width:auto; height:58px; margin:0; border-radius:16px; clip-path:none;
+  display:flex; align-items:center; justify-content:center; gap:2px;
+  background:#fff; border:1.5px solid var(--card-border); color:var(--ink);
+  font-family:var(--tu-font-num); font-size:15px; font-weight:700; letter-spacing:-.01em;
+  transition:transform .5s var(--tu-spring),opacity .45s,filter .45s,border-color .25s,background .25s,color .25s,box-shadow .35s var(--tu-ease);
+}
+html body .topup-preset .cur{ color:var(--text-faint); font-weight:600; font-size:12px; transition:color .25s; }
+html body .topup-preset:not(.first):not(.shown){
+  width:auto; margin:0; border-width:1.5px; opacity:.4; transform:scale(.92); filter:blur(1.5px); pointer-events:none;
+}
+html body .topup-preset.first:not(.active){ border-color:var(--sky-300); }
+html body .topup-presets:not(.expanded) .topup-preset.first{ box-shadow:none; animation:none; }
+html body .topup-presets:not(.expanded) .topup-preset.first::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; border:2px solid var(--sky-500);
+  animation:tuBreath 1.9s ease-in-out infinite;
+}
+@keyframes tuBreath{ 0%,100%{ opacity:0; } 50%{ opacity:.9; } }
+html body .topup-presets.expanded .topup-preset.first{ box-shadow:none; animation:none; }
+@media (hover:hover){
+  html body .topup-preset:hover,html body .topup-method:hover{ transform:translateY(-2px); border-color:var(--sky-300); }
+  html body .topup-method:hover{ box-shadow:var(--shadow-m); }
+}
+html body .topup-preset.active{
+  border-color:transparent; color:#fff; transform:translateY(-2px);
+  background:linear-gradient(135deg,#46aef2,#1f86d6); box-shadow:0 14px 24px -12px rgba(31,134,214,.85);
+}
+html body .topup-preset.active .cur{ color:rgba(255,255,255,.8); }
+html body .topup-preset:active,html body .topup-method:active{ transform:scale(.95); }
+
+/* ---- custom amount ---- */
+html body .topup-custom-divider{ display:flex; align-items:center; gap:12px; font-size:12px; font-weight:600; color:var(--text-faint); margin:14px 0 12px; }
+html body .topup-custom-divider::before,html body .topup-custom-divider::after{ content:""; flex:1; height:1px; background:var(--gray-200); }
+html body .topup-custom-wrap{
+  display:flex; align-items:center; gap:8px; height:58px; padding:0 18px; border-radius:16px;
+  background:var(--sky-50); border:1.5px solid var(--sky-100);
+  transition:border-color .25s,box-shadow .35s var(--tu-ease),background .25s;
+}
+html body .topup-custom-wrap:focus-within{ background:#fff; border-color:var(--sky-500); box-shadow:0 0 0 4px rgba(47,155,232,.16); }
+html body .topup-custom-cur{ font-family:var(--tu-font-num); font-size:17px; font-weight:700; color:var(--sky-700); }
+html body .topup-custom-input{
+  flex:1; min-width:0; height:100%; padding:0; border:0; background:transparent; box-shadow:none; border-radius:0;
+  font-family:var(--tu-font-num); font-size:22px; font-weight:700; color:var(--ink); text-align:right; letter-spacing:-.01em;
+}
+html body .topup-custom-input:focus{ border:0; box-shadow:none; }
+html body .topup-custom-input::placeholder{ color:#b6c5d6; font-weight:700; }
+html body .topup-custom-suffix{ font-family:var(--tu-font-num); font-size:16px; font-weight:600; color:var(--text-faint); }
+html body .topup-custom-hint{ font-size:11.5px; line-height:1.65; color:var(--text-dim); margin-top:10px; }
+
+/* ---- Buttons ---- */
+html body .topup-submit{
+  position:relative; overflow:hidden; isolation:isolate; display:flex; align-items:center; justify-content:center; gap:9px;
+  width:100%; height:56px; padding:0 20px; border:0; border-radius:16px; text-decoration:none; cursor:pointer;
+  font-family:var(--tu-font-display); font-size:15px; font-weight:800; letter-spacing:0; color:#fff;
+  background:linear-gradient(135deg,#46aef2,#1f86d6); box-shadow:0 16px 28px -14px rgba(31,134,214,.85);
+  transition:transform .4s var(--tu-spring),box-shadow .35s var(--tu-ease),background .3s,color .3s;
+}
+html body .topup-submit svg{ width:18px; height:18px; transition:transform .35s var(--tu-ease); }
+html body .topup-submit:not(:disabled)::after{
+  content:""; position:absolute; z-index:-1; top:0; left:0; width:45%; height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);
+  transform:translateX(-130%) skewX(-20deg); animation:tuBtnShine 4.2s var(--tu-ease) 1.5s infinite;
+}
+@keyframes tuBtnShine{ 0%{ transform:translateX(-130%) skewX(-20deg); } 38%,100%{ transform:translateX(340%) skewX(-20deg); } }
+@media (hover:hover){
+  html body .topup-submit:not(:disabled):hover{ transform:translateY(-2px); box-shadow:0 20px 32px -14px rgba(31,134,214,.95); }
+  html body .topup-submit:not(:disabled):hover svg{ transform:translateX(3px); }
+}
+html body .topup-submit:not(:disabled):active{ transform:scale(.98); }
+html body .topup-submit:disabled{ background:#e8eff7; color:#9db0c5; box-shadow:none; opacity:1; cursor:not-allowed; }
+html body .topup-submit.topup-submit-alt{
+  background:#fff; color:var(--sky-700); border:1.5px solid var(--card-border); box-shadow:var(--shadow-s);
+}
+html body .topup-submit.topup-submit-alt::after{ content:none; }
+html body .topup-note{ font-size:11.5px; color:var(--text-faint); text-align:center; margin-top:14px; line-height:1.6; }
+
+.tu-ripple{
+  position:absolute; z-index:0; border-radius:50%; pointer-events:none; background:rgba(255,255,255,.45);
+  transform:scale(0); animation:tuRipple .65s var(--tu-ease) forwards;
+}
+.topup-preset:not(.active) .tu-ripple,.topup-method .tu-ripple,.topup-back-btn .tu-ripple{ background:rgba(47,155,232,.2); }
+@keyframes tuRipple{ to{ transform:scale(1); opacity:0; } }
+
+/* ---- Guide: เส้นเวลา ---- */
+html body .topup-guide{ margin-top:28px; padding:0 4px; }
+html body .topup-guide ol{ position:relative; gap:0; }
+html body .topup-guide li{ position:relative; gap:14px; padding-bottom:20px; font-size:13px; line-height:1.65; color:var(--text-dim); }
+html body .topup-guide li:last-child{ padding-bottom:0; }
+html body .topup-guide li:not(:last-child)::before{
+  content:""; position:absolute; left:14px; top:30px; bottom:2px; width:2px; border-radius:2px;
+  background:linear-gradient(var(--sky-300),var(--gray-200));
+}
+html body .topup-guide .num{
+  flex:0 0 auto; width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+  background:#fff; border:1.5px solid var(--sky-300); color:var(--sky-700); box-shadow:var(--shadow-s);
+  font-family:var(--tu-font-num); font-size:12px; font-weight:700;
+}
+
+/* ---------------------------------------------------------
+   Step 2 : ยอดโอน + QR (ตั๋ว)
+   --------------------------------------------------------- */
+html body .topup-card.topup-pay-amount-card{
+  position:relative; overflow:hidden; isolation:isolate; text-align:center; padding:24px 18px 26px;
+  margin-bottom:0 !important; border:0; border-radius:26px 26px 0 0; color:#fff;
+  background:
+    repeating-radial-gradient(circle at -8% -20%, transparent 0 38px, rgba(255,255,255,.11) 39px 40px),
+    linear-gradient(150deg,#52b4f5 0%,#2492e3 48%,#1769b5 100%) !important;
+  box-shadow:0 22px 40px -22px rgba(23,105,181,.85);
+}
+html body .topup-pay-amount-card .lbl{ font-size:12.5px; font-weight:600; color:rgba(255,255,255,.86); letter-spacing:0; text-transform:none; margin-bottom:6px; }
+html body .topup-pay-amount-card .val{
+  font-family:var(--tu-font-num); font-size:42px; font-weight:700; line-height:1.15; letter-spacing:-.02em; color:#fff;
+  font-variant-numeric:tabular-nums; text-shadow:0 2px 14px rgba(10,60,110,.28);
+}
+html body .topup-card.topup-pay-amount-card + .topup-card{
+  position:relative; margin-top:0; margin-bottom:24px !important; padding:30px 20px 22px; border-radius:0 0 26px 26px;
+}
+html body .topup-card.topup-pay-amount-card + .topup-card::before{
+  content:""; position:absolute; left:20px; right:20px; top:0; height:0; border-top:2px dashed var(--sky-100);
+}
+html body .topup-qr-frame{ position:relative; width:222px; height:222px; margin:0 auto 16px; display:grid; place-items:center; }
+html body .topup-qr-box{
+  width:196px; height:196px; border-radius:16px; padding:10px; background:#fff; color:var(--text-faint); font-size:12px;
+  border:1px solid var(--card-border); box-shadow:var(--shadow-m); overflow:hidden;
+  animation:tuQrIn .8s var(--tu-spring) both;
+}
+@keyframes tuQrIn{ from{ opacity:0; transform:scale(.86); } }
+html body .topup-qr-frame .corner{ width:26px; height:26px; animation:tuCorner 2.6s ease-in-out infinite; }
+html body .topup-qr-frame .corner.tl{ transform-origin:0 0; }
+html body .topup-qr-frame .corner.tr{ transform-origin:100% 0; }
+html body .topup-qr-frame .corner.bl{ transform-origin:0 100%; }
+html body .topup-qr-frame .corner.br{ transform-origin:100% 100%; }
+@keyframes tuCorner{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(.86); } }
+html body .topup-qr-frame .scanline{
+  left:18px; right:18px; height:2px; background:linear-gradient(90deg,transparent,var(--sky-500),transparent);
+  box-shadow:0 0 12px 1px rgba(47,155,232,.7);
+}
+html body .topup-qr-hint{ font-size:12px; line-height:1.65; color:var(--text-dim); text-align:center; }
+
+/* upload */
+html body .topup-upload{
+  position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  padding:26px 16px; margin-bottom:16px; border-radius:22px; text-align:center; cursor:pointer;
+  background:var(--sky-50); border:2px dashed #a9d2f2;
+  transition:border-color .3s,background .3s,transform .45s var(--tu-spring),box-shadow .35s var(--tu-ease);
+}
+@media (hover:hover){
+  html body .topup-upload:hover{ background:#fff; border-color:var(--sky-500); transform:translateY(-2px); box-shadow:var(--shadow-m); }
+  html body .topup-upload:hover svg{ transform:translateY(-4px); }
+}
+html body .topup-upload:active{ transform:scale(.985); }
+html body .topup-upload svg{ width:28px; height:28px; color:var(--sky-500); margin-bottom:2px; transition:transform .45s var(--tu-spring),color .3s; }
+html body .topup-upload .fname{ font-size:13.5px; font-weight:700; color:var(--ink); word-break:break-all; }
+html body .topup-upload .fhint{ font-size:11.5px; color:var(--text-faint); }
+html body .topup-upload.has-file{ background:#effaf5; border:2px solid #7ad6b0; }
+html body .topup-upload.has-file svg{ color:var(--green); }
+html body .topup-upload-preview{ max-width:200px; max-height:150px; border-radius:14px; box-shadow:var(--shadow-m); }
+html body .topup-upload-preview.show{ animation:tuQrIn .6s var(--tu-spring) both; }
+
+/* ---------------------------------------------------------
+   Step 3 : รอตรวจสอบ
+   --------------------------------------------------------- */
+html body .tuw-card{ padding:30px 20px 22px; border-radius:26px; }
+html body .tuw-card[data-state="pending"]{ --tuw-a:#f2a516; --tuw-glow:rgba(242,165,22,.22); }
+html body .tuw-card[data-state="reviewing"]{ --tuw-a:#2f9be8; --tuw-glow:rgba(47,155,232,.24); }
+html body .tuw-card[data-state="success"]{ --tuw-a:#16a870; --tuw-glow:rgba(22,168,112,.24); }
+html body .tuw-card[data-state="failed"]{ --tuw-a:#e5484d; --tuw-glow:rgba(229,72,77,.2); }
+html body .tuw-icon-orb{ width:84px; height:84px; margin-bottom:18px; }
+html body .tuw-icon-core{
+  width:52px; height:52px; background:#fff;
+  box-shadow:0 10px 22px -8px var(--tuw-a,#2f9be8),0 0 0 1px rgba(14,34,55,.05);
+}
+html body #tuwHeadline{ font-family:var(--tu-font-display); font-size:19px; font-weight:800; letter-spacing:0; color:var(--ink); margin-bottom:8px; }
+html body #tuwSub{ font-size:12.5px; line-height:1.75; color:var(--text-dim); margin-bottom:20px; }
+html body .tuw-toast{ background:var(--sky-50); border-color:var(--sky-100); color:var(--sky-700); }
+html body .tuw-toast.success{ background:#eefaf4; border-color:#bfe9d6; color:#0f8a5a; }
+html body .tuw-toast.failed{ background:#fff1f1; border-color:#f6c9cb; color:#c93a3f; }
+html body .tuw-node.failed{ border-color:#e5484d; background:rgba(229,72,77,.1); box-shadow:0 0 10px -2px #e5484d; }
+html body .tuw-timeline-labels{ font-size:10.5px; }
+html body .topup-waiting-info{ background:var(--sky-50); border:1px solid var(--sky-100); border-radius:16px; padding:14px 16px; gap:10px; }
+html body .topup-waiting-info .row{ font-size:13px; color:var(--text-dim); }
+html body .topup-waiting-info .row b{ color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; }
+html body .tuw-btn-row{ gap:12px; margin-top:18px; }
+
+/* confetti เมื่อเติมเงินสำเร็จ */
+.tu-confetti{ position:absolute !important; left:50%; top:72px; width:0; height:0; z-index:2 !important; pointer-events:none; }
+.tu-confetti i{
+  position:absolute; left:-4px; top:-4px; width:8px; height:12px; border-radius:2px; background:var(--c,#2f9be8);
+  opacity:0; animation:tuConfetti 1.3s var(--tu-ease) forwards;
+}
+@keyframes tuConfetti{
+  0%{ opacity:1; transform:translate(0,0) rotate(0); }
+  100%{ opacity:0; transform:translate(var(--dx),calc(var(--dy) + 40px)) rotate(var(--r)); }
+}
+
+/* ---------------------------------------------------------
+   Entrance: จังหวะเดียวตอนเข้าหน้า / เปลี่ยนขั้น (ตอบสนองการกด)
+   --------------------------------------------------------- */
+#topupStepAmount:not(.u-hidden) > *,
+#topupStepPay:not(.u-hidden) > *,
+#topupStepWaiting:not(.u-hidden) > *{ animation:tuIn .8s var(--tu-ease) both; }
+#topupStepAmount > :nth-child(2){ animation-delay:.06s; }
+#topupStepAmount > :nth-child(3){ animation-delay:.12s; }
+#topupStepAmount > :nth-child(4){ animation-delay:.18s; }
+#topupStepAmount > :nth-child(5){ animation-delay:.24s; }
+#topupStepAmount > :nth-child(6){ animation-delay:.3s; }
+#topupStepPay > :nth-child(2){ animation-delay:.06s; }
+#topupStepPay > :nth-child(3){ animation-delay:.12s; }
+#topupStepPay > :nth-child(4){ animation-delay:.18s; }
+#topupStepPay > :nth-child(5){ animation-delay:.24s; }
+#topupStepPay > :nth-child(6){ animation-delay:.3s; }
+#topupStepWaiting > :nth-child(2){ animation-delay:.08s; }
+.tu-steps{ animation:tuIn .7s var(--tu-ease) both; }
+@keyframes tuIn{ from{ opacity:0; transform:translateY(18px); } }
+
+/* ---------------------------------------------------------
+   Small screens / reduced motion
+   --------------------------------------------------------- */
+@media (max-width:360px){
+  html body .topup-main{ padding-inline:14px; }
+  html body .topup-card{ padding:16px; }
+  html body .topup-amount-summary .sum-value,html body .topup-pay-amount-card .val{ font-size:34px; }
+  html body .topup-preset{ font-size:14px; }
+}
+@media (prefers-reduced-motion:reduce){
+  html body .topup-main *,html body .topup-main *::before,html body .topup-main *::after,.tu-steps,.tu-steps *{
+    animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;
+  }
+}
+
+/* กันไม่ให้ display ของดีไซน์ใหม่ทับ .u-hidden */
+html body .topup-main .u-hidden{ display:none !important; }
