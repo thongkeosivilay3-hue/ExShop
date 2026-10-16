@@ -1,29 +1,30 @@
 /* =========================================================
    page-transition.css
-   แอนิเมชั่นสลับหน้า "เลื่อนสปริงเด้ง" (Elastic Slide) — สไตล์ #12
+   สลับหน้าแบบนุ่มๆ: หน้าใหม่ค่อยๆ มุดขึ้นมาจากด้านล่าง (เลื่อนขึ้น + จางเข้า)
+   พอกดเปลี่ยนหน้า หน้าเดิมจะค่อยๆ จางหายไปก่อน แล้วค่อยไปหน้าถัดไป
    ใช้ transform + opacity เท่านั้น (GPU-accelerated) เพื่อไม่ให้กระตุก
-   ทำงานคู่กับ page-transition.js
+   ทำงานคู่กับ page-transition.js  (ไม่มีหน้าโหลดแล้ว)
    ========================================================= */
 
-/* หน้าปรากฏขึ้นตอนโหลดเสร็จ (เลื่อนเข้า + เด้งสปริงเบาๆ) */
+/* หน้าปรากฏตอนโหลดเสร็จ: ค่อยๆ มุดขึ้นมา */
 .shell,
 .auth-shell{
-  animation: pt-in .16s cubic-bezier(.22, 1, .36, 1) both;
+  animation: pt-in .55s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 @keyframes pt-in{
-  from{ opacity:0; transform:translateX(14px); }
-  to  { opacity:1; transform:translateX(0); }
+  from{ opacity:0; transform:translateY(22px); }
+  to  { opacity:1; transform:translateY(0); }
 }
 
-/* หน้าปัจจุบันเลื่อนออกก่อนสลับไปหน้าถัดไป (เล่นจาก page-transition.js) */
+/* กดเปลี่ยนหน้า: ค่อยๆ จางออก (เล่นจาก page-transition.js) */
 .pt-exit{
-  animation: pt-out .1s ease-in both !important;
+  animation: pt-out .32s ease-in-out both !important;
 }
 
 @keyframes pt-out{
-  from{ opacity:1; transform:translateX(0); }
-  to  { opacity:0; transform:translateX(-10px); }
+  from{ opacity:1; }
+  to  { opacity:0; }
 }
 
 /* เคารพผู้ใช้ที่ปิดการใช้งานโมชั่นในระบบ (accessibility) */

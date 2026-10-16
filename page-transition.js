@@ -1,8 +1,8 @@
 /* =========================================================
    page-transition.js
    ควบคุมแอนิเมชั่นตอนสลับหน้า (คู่กับ page-transition.css)
-   - หน้าใหม่: เล่นแอนิเมชั่นเข้าอัตโนมัติผ่าน CSS (ไม่ต้องรอ JS)
-   - คลิกลิงก์ภายในเว็บ: เล่นแอนิเมชั่นออกก่อน แล้วค่อยเปลี่ยนหน้าจริง
+   - หน้าใหม่: ค่อยๆ มุดขึ้นมาอัตโนมัติผ่าน CSS (ไม่ต้องรอ JS)
+   - คลิกลิงก์ภายในเว็บ: ค่อยๆ จางออกก่อน แล้วค่อยเปลี่ยนหน้าจริง
    - ใช้ transform/opacity ล้วนๆ กัน jank และเคารพ prefers-reduced-motion
    ========================================================= */
 (function () {
@@ -17,20 +17,10 @@
     }
   } catch (e) {}
 
-  var EXIT_MS = 100; // ต้องตรงกับ .pt-exit ใน page-transition.css
+  var EXIT_MS = 320; // ต้องตรงกับ .pt-exit ใน page-transition.css
 
   var wrapper = document.querySelector('.shell, .auth-shell');
   if (!wrapper) return;
-
-  // โชว์หน้าโหลด (โลโก้ + วงแหวน) ทันทีที่กดลิงก์ — ไม่ต้องรอหน้าใหม่โหลดก่อนถึงจะเห็นแอนิเมชั่น
-  function showLoader() {
-    if (document.getElementById('page-loader') || !window.__plBuild) return;
-    document.documentElement.appendChild(window.__plBuild());
-  }
-  // กลับมาจาก bfcache -> เอาหน้าโหลดที่ค้างออก
-  window.addEventListener('pageshow', function (e) {
-    if (e.persisted) { var l = document.getElementById('page-loader'); if (l && l.parentNode) l.parentNode.removeChild(l); }
-  });
 
   var navigating = false;
 
@@ -91,6 +81,6 @@
     navigating = true;
     wrapper.style.willChange = 'transform, opacity';
     wrapper.classList.add('pt-exit');
-    showLoader(); setTimeout(function () { location.href = href; }, EXIT_MS);
+    setTimeout(function () { location.href = href; }, EXIT_MS);
   });
 })();
