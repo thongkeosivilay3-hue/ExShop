@@ -243,8 +243,14 @@ document.addEventListener('DOMContentLoaded', () => {
       img.src = user.avatar;
       img.alt = user.username;
       loginBtn.appendChild(img);
+    } else {
+      const ph = document.createElement('span');
+      ph.className = 'ph';
+      ph.textContent = (user.username || '?').trim().slice(0, 1).toUpperCase();
+      loginBtn.appendChild(ph);
     }
     const nameSpan = document.createElement('span');
+    nameSpan.className = 'nm';
     nameSpan.textContent = user.username;
     loginBtn.appendChild(nameSpan);
     loginBtn.title = user.username;
@@ -259,11 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
     bar.setAttribute('aria-label', 'ເມນູບັນຊີ');
     bar.setAttribute('aria-hidden', 'true');
     bar.innerHTML =
+      '<div class="acct-rail">' +
       '<span class="tabbar-pill"></span>' +
       tabs.map((t, i) =>
-        `<a href="${t.href}" class="tabbar-item${t.key === currentKey ? ' active' : ''}" data-key="${t.key}" aria-label="${t.label}" title="${t.label}" style="--i:${i}">${t.icon}<span class="tabbar-label">${t.short || t.label}</span></a>`
+        `<a href="${t.href}" class="tabbar-item${t.key === currentKey ? ' active' : ''}" data-key="${t.key}" aria-label="${t.label}" title="${t.label}" style="--i:${i}">${t.icon}<span class="tabbar-label"><i style="--i:${i}">${t.short || t.label}</i></span></a>`
       ).join('') +
-      `<button type="button" class="tabbar-item danger" id="acctTabLogout" aria-label="ອອກຈາກລະບົບ" title="ອອກຈາກລະບົບ" style="--i:${tabs.length}">${TB_LOGOUT_ICON}<span class="tabbar-label">ອອກ</span></button>`;
+      `<button type="button" class="tabbar-item danger" id="acctTabLogout" aria-label="ອອກຈາກລະບົບ" title="ອອກຈາກລະບົບ" style="--i:${tabs.length}">${TB_LOGOUT_ICON}<span class="tabbar-label"><i style="--i:${tabs.length}">ອອກ</i></span></button>` +
+      '</div>';
     document.body.appendChild(bar);
 
     // ---- การ์ดโปรไฟล์ที่ไหลลงมาจากปุ่มโปรไฟล์: ยอดเงิน + สถิติ + ทางลัด ----
@@ -289,7 +297,11 @@ document.addEventListener('DOMContentLoaded', () => {
         '<a href="leaderboard.html" class="acct-btn rank" id="acctRank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5a1 1 0 0 0-1 1c0 2.2 1.6 3.800 4 4M16 6h3a1 1 0 0 1 1 1c0 2.200-1.600 3.800-4 4M12 13v4M8.500 20h7M10 17h4"/></svg>ຈັດອັນດັບຍອດເຕີມ</a>' +
       '</div>' +
       '<div class="acct-embers"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
-    document.body.appendChild(card);
+    // อยู่ในหน้าที่มีการ์ดต้อนรับ (.hero) -> ฝังการ์ดโปรไฟล์ทับตำแหน่งเดียวกัน แล้วให้ 2 ใบ cross-fade กัน
+    // หน้าอื่น (ไม่มี .hero) -> ใช้การ์ดลอยใต้ header เหมือนเดิมแต่จางเข้า
+    const hero = document.querySelector('.hero');
+    if (hero) { card.classList.add('in-hero'); hero.appendChild(card); }
+    else { document.body.appendChild(card); }
 
     // ---- ปุ่ม "จัดอันดับยอดเติม": แสงแดงพุ่งขยายจากปุ่มเต็มจอ แล้วเปิดหน้าอันดับ ----
     const rankBtn = card.querySelector('#acctRank');
@@ -322,15 +334,25 @@ document.addEventListener('DOMContentLoaded', () => {
         animateNum(card.querySelector('#acctSpent'), st.totalSpent, '', 1000);
       } catch (e) { statsLoaded = false; }
     };
+    // ตั้งจุดกำเนิดการ์ด = กลางปุ่มโปรไฟล์ (การ์ดโผล่เล็กๆ ตรงนั้นแล้วขยายใหญ่)
     const placeCard = () => {
-      const r = loginBtn.getBoundingClientRect();
-      const right = Math.max(12, window.innerWidth - r.right);
-      card.style.top = (r.bottom + 14) + 'px';
-      card.style.right = right + 'px';
-      const left = window.innerWidth - right - card.offsetWidth;
-      const ax = Math.min(card.offsetWidth - 26, Math.max(26, r.left + r.width / 2 - left));
-      card.style.setProperty('--ax', ax + 'px');
-      card.style.transformOrigin = ax + 'px 0';
+      const b = loginBtn.getBoundingClientRect();
+      if (!hero) {
+        const hd = document.querySelector('header');
+        const hr = hd ? hd.getBoundingClientRect() : b;
+        const railLeft = hr.right - 58;
+        card.style.top = (hr.bottom + 12) + 'px';
+        card.style.right = Math.max(8, window.innerWidth - railLeft + 8) + 'px';
+      }
+      const cr = card.getBoundingClientRect();
+      // getBoundingClientRect ตอนยังย่ออยู่จะเพี้ยน -> ใช้ offset เดิมของการ์ด (ยังไม่ scale) แทน
+      const w = card.offsetWidth, h = card.offsetHeight;
+      const left = hero ? hero.getBoundingClientRect().left + card.offsetLeft : (cr.right - w);
+      const top  = hero ? hero.getBoundingClientRect().top + card.offsetTop  : (cr.top);
+      const ox = Math.min(w, Math.max(0, b.left + b.width / 2 - left));
+      const oy = Math.min(h, Math.max(0, b.top + b.height / 2 - top));
+      card.style.setProperty('--ox', ox + 'px');
+      card.style.setProperty('--oy', oy + 'px');
     };
     // ตัวเลขวิ่ง: ถ้ามีค่า → วิ่งขึ้นจาก 0 / ถ้าเป็น 0 → สุ่มเลขเร็วๆ แล้วหมุนลงมาเหลือ 0 (เห็นแอนิเมชั่นเสมอ)
     const balEl = card.querySelector('#acctBal');
@@ -369,46 +391,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeItem = () => items.find((x) => x.classList.contains('active'));
     const isOpen = () => bar.classList.contains('show');
 
-    // เลื่อนแถบสีแดงไปใต้ไอคอนที่เลือก (anim=false = วาร์ปไปเลย ไม่ต้องไหลมา)
+    // เลื่อนแถบสีไปหลังไอคอนที่เลือก (แนวตั้ง) (anim=false = วาร์ปไปเลย)
     const movePill = (el, anim = true) => {
       if (!el) { pill.style.opacity = 0; return; }
       pill.style.transition = anim ? '' : 'none';
-      pill.style.width = el.offsetWidth + 'px';
-      pill.style.transform = `translateX(${el.offsetLeft}px)`;
+      pill.style.height = el.offsetHeight + 'px';
+      pill.style.transform = `translate3d(0, ${el.offsetTop}px, 0)`;
       pill.style.opacity = 1;
       if (!anim) { void pill.offsetWidth; pill.style.transition = ''; }
     };
 
-    let fabTimer = null;
+    // วางแถบแนวตั้งให้ต่อจากหัวเว็บ (ชิดขอบขวา ความสูงช่องบน = ความสูงหัวเว็บ)
+    const placeRail = () => {
+      const hd = document.querySelector('header');
+      const hr = hd ? hd.getBoundingClientRect() : loginBtn.getBoundingClientRect();
+      bar.style.setProperty('--rail-top', hr.top + 'px');
+      bar.style.setProperty('--rail-right', Math.max(0, window.innerWidth - hr.right) + 'px');
+      bar.style.setProperty('--rail-head', hr.height + 'px');
+    };
+
     const closeBar = () => {
-      if (!isOpen()) return; // ไม่ได้เปิดอยู่ ก็ไม่ต้องเล่นอนิเมชั่นปิด (เช่นกด Esc ตอนแถบปิดอยู่)
-      // อนิเมชั่นปิด (tabbar-close-fx.js): ต้องเรียก "ก่อน" เอา .show ออก เพื่อวัดตำแหน่งแถบตอนยังเปิดเต็ม
-      const animating = !!(window.TabbarFX && window.TabbarFX.close(bar, loginBtn));
+      if (!isOpen()) return;
       bar.classList.remove('show');
       bar.setAttribute('aria-hidden', 'true');
-      clearTimeout(fabTimer);
-      if (animating) {
-        // ปุ่มแชทค่อยลอยลงตอนแถบหายไปแล้ว ไม่ให้ซ้อนกับฉากบีบแถบ
-        fabTimer = setTimeout(() => document.body.classList.remove('tabbar-open'), 380);
-      } else {
-        document.body.classList.remove('tabbar-open');
-      }
+      document.body.classList.remove('tabbar-open');
       loginBtn.setAttribute('aria-expanded', 'false');
       card.classList.remove('show');
       card.setAttribute('aria-hidden', 'true');
+      if (hero) hero.classList.remove('acct-open');
     };
     const openBar = () => {
-      clearTimeout(fabTimer);
-      if (window.TabbarFX) window.TabbarFX.cancel(bar); // เปิดซ้ำระหว่างกำลังปิด -> ยกเลิกฉากปิดทันที
+      // ถ้าเลื่อนหน้าลงมาจนมองไม่เห็นการ์ดต้อนรับ -> เลื่อนกลับขึ้นไปก่อน (นุ่มๆ)
+      if (hero && hero.getBoundingClientRect().top < 80) window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      placeRail();
       bar.classList.add('show');
       bar.setAttribute('aria-hidden', 'false');
       document.body.classList.add('tabbar-open');
       loginBtn.setAttribute('aria-expanded', 'true');
       movePill(activeItem(), false);
       placeCard();
+      if (hero) hero.classList.add('acct-used', 'acct-open');
+      void card.offsetWidth;
       card.classList.add('show');
       burst();
-      setTimeout(countUp, 260);
+      setTimeout(countUp, 420);
       card.setAttribute('aria-hidden', 'false');
       loadCardStats();
     };
@@ -427,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBar(); });
     window.addEventListener('scroll', () => { if (isOpen()) placeCard(); }, { passive: true });
-    window.addEventListener('resize', () => { if (isOpen()) { movePill(activeItem(), false); placeCard(); } });
+    window.addEventListener('resize', () => { if (isOpen()) { placeRail(); movePill(activeItem(), false); placeCard(); } });
 
     items.forEach((el) => {
       el.addEventListener('click', (e) => {

@@ -1,0 +1,345 @@
+/* =========================================================
+   profile-fx.css — (ทดลอง) อนิเมชั่นใหม่ตอนกดปุ่มโปรไฟล์
+   โหลด "หลัง" theme.css ทุกหน้า  |  ใช้ translate / scale / opacity ล้วน = ลื่นบน GPU
+
+   1) แถบเมนูล่าง (#acctTabbar): ไหลลงมาจากปุ่มโปรไฟล์ → ลงมาจอดด้านล่าง (ease-out นุ่มๆ ไม่เด้ง)
+      ตอนปิด: ไหลกลับขึ้นไปเก็บที่ปุ่มโปรไฟล์
+   2) การ์ดโปรไฟล์ (#acctCard): ค่อยๆ จางเข้ามาแทนที่การ์ดต้อนรับ (.hero) ตรงกลางหน้า
+      การ์ดต้อนรับจางหายไปพร้อมกัน (cross-fade) — หน้าที่ไม่มี .hero จะจางลงใต้ header แทน
+   3) ดีไซน์การ์ดใหม่เป็นโทนฟ้า-ขาว เข้ากับธีม (แก้ปุ่ม "จัดอันดับ" ที่ตัวหนังสือสีขาวบนพื้นขาวจนมองไม่เห็น)
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1) TAB BAR
+   --------------------------------------------------------- */
+html .tabbar{
+  /* ตัวแปร --tb-dx/--tb-dy ถูกตั้งโดย script.js = ระยะจากตำแหน่งจอดไปหาปุ่มโปรไฟล์ */
+  transform:translateX(-50%);
+  translate:var(--tb-dx, 0px) var(--tb-dy, -60vh);
+  scale:.35;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transform-origin:50% 50%;
+  will-change:translate, scale, opacity;
+  background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(238,246,253,.92));
+  border:1px solid rgba(206,225,243,.95);
+  box-shadow:0 18px 40px -14px rgba(23,105,181,.38), 0 2px 6px rgba(23,105,181,.08), inset 0 1px 0 #fff;
+  /* ปิด: ไหลกลับขึ้นหาปุ่ม (เร่งช้าๆ แล้วเร็วขึ้น) */
+  transition:
+    translate .6s cubic-bezier(.55,0,.35,1),
+    scale .6s cubic-bezier(.55,0,.35,1),
+    opacity .4s ease .12s,
+    visibility 0s linear .62s;
+}
+html .tabbar.show{
+  translate:0 0;
+  scale:1;
+  opacity:1; visibility:visible; pointer-events:auto;
+  /* เปิด: พุ่งลงมาแล้วค่อยๆ ชะลอจนจอด (ease-out expo) */
+  transition:
+    translate 1s cubic-bezier(.16,1,.3,1),
+    scale 1s cubic-bezier(.16,1,.3,1),
+    opacity .45s ease,
+    visibility 0s;
+}
+
+/* ไอคอนในแถบ: จางขึ้นมาไล่ทีละอันหลังแถบลงมาถึง (ไม่มี overshoot) */
+html .tabbar .tabbar-item{
+  opacity:0; transform:translateY(10px) scale(.92);
+  transition:opacity .2s ease, transform .25s ease, color .3s ease;
+}
+html .tabbar.show .tabbar-item{
+  opacity:1; transform:none;
+  transition:
+    opacity .5s ease calc(.28s + var(--i, 0) * 45ms),
+    transform .7s cubic-bezier(.22,1,.36,1) calc(.28s + var(--i, 0) * 45ms),
+    color .3s ease;
+}
+html .tabbar.show .tabbar-item:active{ transform:scale(.9); transition-delay:0s; }
+
+/* แถบเลือกเมนู + สี active เป็นฟ้า (เดิมเป็นแดงอมชมพู) */
+html .tabbar-pill{
+  background:linear-gradient(180deg, #e8f4fe, #d3e8fa);
+  border:1px solid #bddcf6;
+  box-shadow:0 6px 14px -6px rgba(47,155,232,.55), inset 0 1px 0 #fff;
+  transition:transform .6s cubic-bezier(.22,1,.36,1), width .6s cubic-bezier(.22,1,.36,1), opacity .25s ease;
+}
+html .tabbar-item.active{ color:var(--sky-700); }
+html .tabbar-item.active svg{ transform:scale(1.1); filter:drop-shadow(0 2px 6px rgba(47,155,232,.45)); }
+html .tabbar-item.danger{ color:#e5484d; opacity:1; }
+html .tabbar-label{ font-weight:700; }
+
+/* ปุ่มแชทลอยหนีขึ้นนุ่มๆ (เดิมเด้ง overshoot) */
+html .chat-fab{ transition:bottom .7s cubic-bezier(.22,1,.36,1); }
+
+/* ปุ่มโปรไฟล์ตอนเมนูเปิด: มีวงแสงฟ้า */
+html .login-btn.is-authed{ transition:box-shadow .45s ease, border-color .45s ease, transform .3s var(--ease); }
+html .login-btn.is-authed[aria-expanded="true"]{
+  border-color:var(--sky-300);
+  box-shadow:0 0 0 4px rgba(47,155,232,.18), var(--shadow-s);
+}
+
+/* ---------------------------------------------------------
+   2) HERO: การ์ดต้อนรับจางออก ↔ การ์ดโปรไฟล์จางเข้า
+   --------------------------------------------------------- */
+/* หลังเปิดเมนูครั้งแรก ปลด heroIn (ที่เล่นจบไปแล้ว) เพื่อให้ transition คุม opacity ได้ */
+html .hero.acct-used > *:not(.acct-card):not(.fx-hero){
+  animation:none;
+  transition:opacity .55s ease .22s, transform .8s var(--ease) .22s;   /* กลับมาเห็น: รอการ์ดโปรไฟล์หุบก่อนนิด */
+}
+html .hero.acct-open > *:not(.acct-card):not(.fx-hero){
+  opacity:0; transform:translateY(-6px) scale(.975); pointer-events:none;
+  transition:opacity .38s ease, transform .5s var(--ease);
+}
+
+/* ---------------------------------------------------------
+   3) CARD (ดีไซน์ใหม่โทนฟ้า-ขาว)
+   --------------------------------------------------------- */
+@keyframes acctRingBlue{ to{ --ang:360deg; } }
+
+html .acct-card{
+  position:fixed; z-index:1090; box-sizing:border-box;
+  width:min(320px, calc(100vw - 24px));
+  padding:14px; border-radius:26px; overflow:hidden;
+  color:var(--ink);
+  background:linear-gradient(160deg, rgba(255,255,255,.97) 0%, rgba(235,245,253,.97) 60%, rgba(214,232,249,.97) 100%);
+  border:1px solid #d7e7f6;
+  box-shadow:var(--shadow-m);
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  filter:none; animation:none;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transform:translateY(-8px) scale(.975);
+  transition:opacity .3s ease, transform .4s var(--ease), visibility 0s linear .3s;
+}
+html .acct-card.show{
+  filter:none; animation:none;
+  opacity:1; visibility:visible; pointer-events:auto; transform:none;
+  transition:opacity .65s ease .08s, transform .9s var(--ease) .08s, visibility 0s;
+}
+html .acct-card::after{ display:none; }              /* ไม่ต้องมีหัวลูกศรแล้ว */
+html .acct-card::before{                              /* ขอบแสงฟ้าวิ่งรอบการ์ด */
+  padding:1.5px; animation:acctRingBlue 6s linear infinite;
+  background:conic-gradient(from var(--ang),
+    rgba(47,155,232,0) 0deg, rgba(47,155,232,0) 200deg,
+    rgba(140,203,247,.85) 270deg, #2f9be8 315deg, #fff 340deg, rgba(47,155,232,0) 360deg);
+}
+html .acct-embers{ display:none !important; }
+
+/* ฝังในการ์ดต้อนรับ: ทับตำแหน่งเดียวกับกรอบ hero (เหมือน .hero::before) */
+html .hero > .acct-card.in-hero{
+  position:absolute; inset:6px 8px 0; width:auto; z-index:3;
+  border-radius:28px; padding:14px 16px;
+  display:flex; flex-direction:column; justify-content:center; gap:9px;
+  animation:none; transform:scale(.97);
+}
+html .hero > .acct-card.in-hero.show{ transform:none; }
+
+/* ของข้างในจางขึ้นมาไล่ทีละชิ้น */
+html body .acct-card > *{
+  position:relative; z-index:1; margin:0;
+  opacity:0; transform:translateY(10px); filter:none;
+  transition:opacity .26s ease, transform .4s var(--rail-ease-close);
+}
+html body .acct-card.show > *{
+  opacity:1; transform:none; filter:none;
+  transition:opacity .6s ease, transform .8s var(--ease);
+}
+html body .acct-card.show > *:nth-child(1){ transition-delay:.22s; }
+html body .acct-card.show > *:nth-child(2){ transition-delay:.30s; }
+html body .acct-card.show > *:nth-child(3){ transition-delay:.38s; }
+html body .acct-card.show > *:nth-child(4){ transition-delay:.46s; }
+
+/* แถวบน: รูป + ชื่อ */
+html .acct-card-top{ display:flex; align-items:center; gap:12px; }
+html .acct-ava{ width:46px; height:46px; }
+html .acct-ava::before{ background:conic-gradient(#2f9be8, #cfe7fb, transparent 55%, #2f9be8); }
+html .acct-ava img, html .acct-card-ph{ inset:3px; width:40px; height:40px; border:2px solid #fff; box-shadow:0 2px 6px rgba(23,105,181,.2); }
+html .acct-card-ph{ background:linear-gradient(135deg,#8ccbf7,#2f9be8); color:#fff; font-size:17px; }
+html .acct-card-id b{ color:var(--ink); font-size:16px; font-weight:800; }
+html .acct-role{ color:var(--sky-700); background:var(--sky-100); }
+html .acct-role.is-admin{ color:#fff; background:linear-gradient(135deg,#46aef2,#1769b5); box-shadow:0 4px 10px -4px rgba(23,105,181,.7); }
+html .acct-edit{ background:#fff; border:1px solid var(--card-border); box-shadow:var(--shadow-s); }
+html .acct-edit svg{ color:var(--sky-700); }
+
+/* ยอดเงิน */
+html .acct-balance{
+  padding:10px 14px; border-radius:16px; color:#fff;
+  background:linear-gradient(135deg, #46aef2 0%, #1f86d6 100%);
+  border:0; box-shadow:0 12px 22px -12px rgba(31,134,214,.85), inset 0 1px 0 rgba(255,255,255,.35);
+}
+html .acct-balance span{ color:#fff; opacity:.95; }
+html .acct-balance b{ font-size:22px; color:#fff; text-shadow:0 1px 10px rgba(10,60,110,.35); }
+
+/* สถิติ */
+html .acct-stats{ gap:8px; }
+html .acct-stats div{ padding:7px 11px; background:#fff; border:1px solid var(--card-border); box-shadow:var(--shadow-s); }
+html .acct-stats b{ color:var(--ink); font-size:16px; }
+html .acct-stats span{ color:var(--text-dim); opacity:1; }
+
+/* ปุ่มล่าง 2 ปุ่มเรียงข้างกัน */
+html .acct-actions{ display:grid; grid-template-columns:1fr 1.25fr; gap:8px; }
+html .acct-btn{ min-width:0; height:42px; padding:0 8px; font-size:13px; white-space:nowrap; gap:6px; }
+html .acct-btn.primary{ color:#fff; background:linear-gradient(135deg,#46aef2,#1f86d6); animation:none; box-shadow:0 10px 18px -10px rgba(31,134,214,.85); }
+html .acct-btn.rank{
+  margin:0; color:var(--sky-700); background:#fff;
+  border:1px solid #cfe3f6; box-shadow:var(--shadow-s);
+}
+html .acct-btn.rank svg{ color:#f2a516; filter:none; }
+html .acct-btn.rank::after{ background:linear-gradient(90deg, transparent, rgba(140,203,247,.4), transparent); }
+html .acct-btn:active{ transform:scale(.96); }
+
+/* วงคลื่นตอนกดปุ่ม → สีฟ้า */
+html .acct-ripple{
+  border-color:rgba(47,155,232,.8);
+  box-shadow:0 0 16px rgba(47,155,232,.45), inset 0 0 12px rgba(47,155,232,.25);
+}
+
+/* ---------------------------------------------------------
+   ผู้ใช้ปิดโมชั่นในระบบ → เปลี่ยนทันที
+   --------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce){
+  html .tabbar, html .tabbar.show, html .tabbar .tabbar-item, html .tabbar.show .tabbar-item,
+  html .acct-card, html .acct-card.show, html body .acct-card > *, html body .acct-card.show > *,
+  html .hero.acct-used > *:not(.acct-card):not(.fx-hero){ transition-duration:.01s !important; transition-delay:0s !important; }
+  html .acct-card::before{ animation:none; }
+}
+
+
+/* =========================================================
+   rail-fx.css — เมนูโปรไฟล์แบบใหม่ (แทนแถบล่าง)
+   กดโปรไฟล์ → ชื่อร้าน/โลโก้เลื่อนซ้ายแล้วหาย → ปุ่มโปรไฟล์หุบเป็นวงกลม
+   → แถบแนวตั้งไหลลงมาจากหัวเว็บ → ไอคอนเลื่อนออกมาทีละอัน → ข้อความเลื่อนขึ้น
+   → การ์ดโปรไฟล์ขยายจากตัวเล็กที่ปุ่ม  |  ใช้ transform / opacity / clip-path ล้วน
+   ========================================================= */
+:root{ --rail-w:58px; --rail-item-h:54px; --rail-ease:cubic-bezier(.16,1,.3,1); --rail-ease-in:cubic-bezier(.55,0,.35,1); --rail-ease-close:cubic-bezier(.45,0,.15,1); }
+
+/* ---- 1) โลโก้ + ชื่อร้าน เลื่อนซ้ายแล้วหาย ---- */
+/* โลโก้ + ชื่อร้าน อยู่ที่เดิมตลอด ไม่ขยับ/ไม่หายตอนเปิด-ปิดเมนู */
+
+/* ---- 2) ปุ่มโปรไฟล์: หุบจากแนวนอนเป็นวงกลมในแถบแนวตั้ง ---- */
+html body .login-btn.is-authed{
+  position:relative; z-index:1110;
+  gap:7px; will-change:transform;
+  transition:box-shadow .45s ease .2s, border-color .45s ease .2s, background-color .45s ease .2s, padding .5s var(--rail-ease) .24s, gap .5s var(--rail-ease) .24s, transform .3s var(--ease);
+}
+html body .login-btn.is-authed img,
+html body .login-btn.is-authed .ph{ width:28px; height:28px; border-radius:50%; display:block; flex-shrink:0; }
+html body .login-btn.is-authed .ph{
+  display:grid; place-items:center; color:#fff; font:800 13px 'Noto Sans Lao Looped','Noto Sans Lao',sans-serif;
+  background:linear-gradient(135deg,#8ccbf7,#2f9be8);
+}
+html body .login-btn.is-authed .nm{
+  display:block; max-width:140px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+  transition:max-width .5s var(--rail-ease) .28s, opacity .3s ease .28s, transform .5s var(--rail-ease) .28s;
+}
+html body .login-btn.is-authed[aria-expanded="true"]{
+  gap:0; padding:5px; background:transparent; border-color:transparent; box-shadow:none;
+  transition-delay:0s;
+}
+html body .login-btn.is-authed[aria-expanded="true"] .nm{ max-width:0; opacity:0; transform:translate3d(14px,0,0); transition-delay:0s; }
+
+/* ---- 3) แถบแนวตั้ง ---- */
+html body nav#acctTabbar.tabbar{
+  position:fixed; left:auto; bottom:auto; transform:none; translate:none; scale:1;
+  top:var(--rail-top,10px); right:var(--rail-right,12px);
+  width:var(--rail-w); z-index:1100; display:block; padding:0; border:0; border-radius:0;
+  background:none; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none;
+  filter:drop-shadow(0 16px 22px rgba(23,105,181,.26)) drop-shadow(0 2px 4px rgba(23,105,181,.12));
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .3s ease .16s, visibility 0s linear .5s;
+}
+html body nav#acctTabbar.tabbar.show{
+  opacity:1; visibility:visible; pointer-events:auto;
+  transition:opacity .2s ease, visibility 0s;
+}
+html body nav#acctTabbar .acct-rail{
+  position:relative; box-sizing:border-box; width:100%;
+  padding:var(--rail-head,80px) 0 8px;
+  border-radius:22px; border:1px solid rgba(206,225,243,.95);
+  background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(238,246,253,.97));
+  /* เริ่ม: เห็นแค่ช่องบนสุด (ตรงกับหัวเว็บ) แล้วไหลลงมา */
+  clip-path:inset(0 0 calc(100% - var(--rail-head,80px)) 0 round 22px);
+  transition:clip-path .5s var(--rail-ease-close);
+  will-change:clip-path;
+}
+html body nav#acctTabbar.show .acct-rail{
+  clip-path:inset(0 0 0 0 round 22px);
+  transition:clip-path .85s var(--rail-ease) .08s;
+}
+
+html body nav#acctTabbar .tabbar-pill{
+  position:absolute; left:5px; right:5px; top:0; width:auto; height:var(--rail-item-h);
+  border-radius:16px; z-index:0; opacity:0; pointer-events:none;
+  background:linear-gradient(180deg,#e8f4fe,#d3e8fa); border:1px solid #bddcf6;
+  box-shadow:0 6px 14px -6px rgba(47,155,232,.55), inset 0 1px 0 #fff;
+  transition:transform .55s var(--rail-ease), opacity .25s ease;
+}
+
+/* ไอคอน: ซ้อนอยู่ใต้อวตาร์ แล้วเลื่อนออกมาทีละอัน */
+html body nav#acctTabbar .tabbar-item{
+  position:relative; z-index:1; box-sizing:border-box; width:100%; height:var(--rail-item-h);
+  flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  padding:0 2px; border-radius:16px; color:var(--text-dim);
+  opacity:0; transform:translate3d(0, calc(var(--i,0) * var(--rail-item-h) * -1 - 14px), 0) scale(.55);
+  transition:opacity .22s ease, transform .5s var(--rail-ease-close), color .3s ease;
+  will-change:transform, opacity;
+}
+html body nav#acctTabbar.show .tabbar-item{
+  opacity:1; transform:none;
+  transition:
+    opacity .35s ease calc(.2s + var(--i,0) * 55ms),
+    transform .75s var(--rail-ease) calc(.2s + var(--i,0) * 55ms),
+    color .3s ease;
+}
+html body nav#acctTabbar.show .tabbar-item:active{ transform:scale(.9); transition-delay:0s; }
+html body.tabbar-open header{ z-index:1105; }
+html body nav#acctTabbar .tabbar-item svg{ width:23px; height:23px; flex-shrink:0; }
+html body nav#acctTabbar .tabbar-item.active{ color:var(--sky-700); }
+html body nav#acctTabbar .tabbar-item.danger{ color:#e5484d; opacity:1; }
+
+/* ข้อความ: เลื่อนขึ้นมาจากเส้นขอบล่างของช่อง (มาสก์ด้วย overflow) */
+html body nav#acctTabbar .tabbar-label{
+  display:block; max-width:100%; height:13px; line-height:13px; overflow:hidden;
+  font-size:9px; font-weight:700; text-align:center; white-space:nowrap; text-overflow:clip;
+}
+html body nav#acctTabbar .tabbar-label > i{
+  display:block; font-style:normal; overflow:hidden; text-overflow:ellipsis;
+  transform:translate3d(0,115%,0); opacity:0;
+  transition:transform .28s var(--rail-ease-close), opacity .18s ease;
+}
+html body nav#acctTabbar.show .tabbar-label > i{
+  transform:none; opacity:1;
+  transition:
+    transform .6s var(--rail-ease) calc(.5s + var(--i,0) * 55ms),
+    opacity .3s ease calc(.5s + var(--i,0) * 55ms);
+}
+
+/* ---- 4) การ์ดโปรไฟล์: โผล่ตัวเล็กจากปุ่ม แล้วขยายใหญ่ ---- */
+html body #acctCard.acct-card{
+  transform-origin:var(--ox,100%) var(--oy,0);
+  transform:scale(.12); opacity:0; visibility:hidden; pointer-events:none;
+  will-change:transform, opacity;
+  transition:transform .6s var(--rail-ease-close) .04s, opacity .28s ease .3s, visibility 0s linear .65s;
+}
+html body #acctCard.acct-card.show{
+  transform:none; opacity:1; visibility:visible; pointer-events:auto;
+  transition:transform .85s var(--rail-ease) .12s, opacity .3s ease .12s, visibility 0s;
+}
+html body .hero > #acctCard.acct-card.in-hero{ inset:6px calc(var(--rail-w) + 20px) 0 8px; transform:scale(.12); }
+html body .hero > #acctCard.acct-card.in-hero.show{ transform:none; }
+/* หน้าที่ไม่มี .hero: การ์ดลอยอยู่ซ้ายของแถบแนวตั้ง -> จำกัดความกว้างไม่ให้ล้นขอบจอซ้าย */
+html body #acctCard.acct-card:not(.in-hero){ width:min(320px, calc(100vw - var(--rail-w) - 36px)); }
+html body #acctCard .acct-btn{ font-size:12px; }
+html body #acctCard.acct-card.in-hero .acct-actions{ grid-template-columns:1fr 1.2fr; }
+
+/* ปุ่มแชทไม่ต้องลอยหนีแล้ว (แถบไม่ได้อยู่ด้านล่าง) */
+html body.tabbar-open .chat-fab{ bottom:calc(20px + env(safe-area-inset-bottom, 0px)); }
+html body.tabbar-open .cxs-tray{ bottom:calc(92px + env(safe-area-inset-bottom, 0px)); }
+
+@media (max-height:620px){ :root{ --rail-item-h:46px; } }
+@media (prefers-reduced-motion: reduce){
+  html body header .brand .logo, html body header .brand .brand-name,
+  html body nav#acctTabbar, html body nav#acctTabbar .acct-rail, html body nav#acctTabbar .tabbar-item,
+  html body nav#acctTabbar .tabbar-label > i, html body #acctCard.acct-card, html body .login-btn.is-authed .nm{
+    transition-duration:.01s !important; transition-delay:0s !important;
+  }
+}
