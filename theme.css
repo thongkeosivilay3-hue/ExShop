@@ -233,9 +233,6 @@ html .stat-card::before{ display:none !important; }
    รอบ 3: เอฟเฟกต์อลังการ (ทำงานคู่ theme.js)
    ========================================================= */
 @property --ring{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
-/* แถบความคืบหน้าการเลื่อน */
-.fx-progress{ position:fixed; top:0; left:0; right:0; height:3px; z-index:60; transform-origin:0 50%; transform:scaleX(0);
-  background:linear-gradient(90deg,#8ccbf7,#2f9be8,#1769b5); box-shadow:0 0 12px rgba(47,155,232,.7); pointer-events:none; }
 /* ฟองอากาศลอยขึ้นพื้นหลัง */
 .fx-bubbles{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
 .fx-bubbles i{ position:absolute; bottom:-60px; border-radius:50%; border:1.5px solid rgba(47,155,232,.28);
@@ -275,13 +272,12 @@ html .btn,html .buy-btn,html .login-btn{ position:relative; overflow:hidden; }
 html .section-title{ padding-bottom:8px; background:linear-gradient(90deg,#2f9be8,#8ccbf7) left bottom/0 3px no-repeat; transition:background-size 1s var(--ease) .3s,opacity .7s var(--ease),transform .7s var(--ease); }
 html .section-title.in{ background-size:64px 3px; }
 /* โลโก้/ไอคอนมีวงคลื่นแผ่ */
-html header .logo{ animation:logoPulse 3.2s ease-out infinite; }
 html .why-icon{ animation:logoPulse 3.6s ease-out infinite; }
 @keyframes logoPulse{ 0%{ box-shadow:0 0 0 0 rgba(47,155,232,.45); } 70%,100%{ box-shadow:0 0 0 14px rgba(47,155,232,0); } }
 html .stat-icon{ animation:iconBob 4s ease-in-out infinite; }
 @keyframes iconBob{ 50%{ transform:translateY(-3px) rotate(-4deg); } }
 html .cat-big-title,html .cat-img-placeholder svg{ animation:iconBob 5s ease-in-out infinite; }
-@media (prefers-reduced-motion:reduce){ .fx-bubbles,.fx-hero,.fx-progress{ display:none; } }
+@media (prefers-reduced-motion:reduce){ .fx-bubbles,.fx-hero{ display:none; } }
 
 /* =========================================================
    รอบ 4: การ์ดสถิติ 4 ใบ — ให้เท่ขึ้น

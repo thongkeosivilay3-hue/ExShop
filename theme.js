@@ -38,10 +38,6 @@
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduce) return;
   var rnd=function(a,b){return a+Math.random()*(b-a)};
-  // แถบความคืบหน้า
-  var bar=document.createElement('div'); bar.className='fx-progress'; document.body.appendChild(bar);
-  function prog(){ var h=document.documentElement; var m=h.scrollHeight-h.clientHeight; bar.style.transform='scaleX('+(m>0?Math.min(1,(window.scrollY||0)/m):0)+')'; }
-  addEventListener('scroll',prog,{passive:true}); prog();
   // ฟองอากาศพื้นหลัง
   var bb=document.createElement('div'); bb.className='fx-bubbles';
   for(var i=0;i<10;i++){ var b=document.createElement('i'), s=rnd(14,46);
