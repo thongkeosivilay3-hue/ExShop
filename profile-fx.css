@@ -343,3 +343,22 @@ html body.tabbar-open .cxs-tray{ bottom:calc(92px + env(safe-area-inset-bottom, 
     transition-duration:.01s !important; transition-delay:0s !important;
   }
 }
+
+
+/* =========================================================
+   หน้าหลัก (body.is-home) = แถบหัวเว็บ (โลโก้ + ชื่อร้าน) ยังอยู่ตามเดิม
+   หน้าอื่นทั้งหมด = ซ่อนแถบโลโก้/ชื่อร้าน เหลือแค่ปุ่มโปรไฟล์ลอยอยู่มุมขวาบน
+   (ตำแหน่งของ header ยังเหมือนเดิม -> แถบเมนูโปรไฟล์/การ์ด/ระยะเนื้อหาไม่ขยับ)
+   ========================================================= */
+html body:not(.is-home) header,
+html body:not(.is-home) header.scrolled,
+html body:not(.is-home) header.is-scrolled{
+  background:none; border-color:transparent; box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  pointer-events:none;                 /* พื้นที่ว่างของแถบไม่บังการกดเนื้อหาข้างล่าง */
+}
+html body:not(.is-home) header::before,
+html body:not(.is-home) header::after{ display:none; }
+html body:not(.is-home) header .brand{ visibility:hidden; opacity:0; pointer-events:none; }
+html body:not(.is-home) header .login-btn{ pointer-events:auto; }
+
