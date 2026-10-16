@@ -171,6 +171,9 @@ async function route(request, env, ctx) {
     if (url.pathname === '/api/public/recent-purchases') {
       return handleRecentPurchases(request, env);
     }
+    if (url.pathname === '/api/public/recent-users') {
+      return handleRecentUsers(request, env);
+    }
     if (url.pathname === '/api/public/top-spenders') {
       return handleTopSpenders(request, env, ctx);
     }
@@ -1564,6 +1567,44 @@ async function handleRecentPurchases(request, env) {
   } catch (err) {
     console.error('handleRecentPurchases failed:', err);
     return json({ error: 'ດຶງລາຍການສິນຄ້າຊື້ລ່າສຸດບໍ່ສຳເລັດ' }, 502);
+  }
+}
+
+/* ---------- 6b-2) GET /api/public/recent-users ----------
+   ใช้กับพื้นหลังการ์ด "ผู้ใช้งาน" ในหน้าแรก (stat-bg.js) — แสดงสมาชิกจริงวนไปเรื่อยๆ
+   ความเป็นส่วนตัว: ส่งเฉพาะ "ชื่อที่ปิดบังบางส่วน" (2 ตัวแรก + ***) และรูปโปรไฟล์ที่ผู้ใช้ตั้งเอง
+   ห้ามส่งอีเมล / user_id / ข้อมูลอื่นออกไปเด็ดขาด */
+async function handleRecentUsers(request, env) {
+  if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    return json({ error: 'Worker missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY' }, 500);
+  }
+  const LIMIT = 100;
+  function maskName(name) {
+    const chars = Array.from(String(name || '').trim());
+    if (!chars.length) return null;
+    return chars.slice(0, 2).join('') + '***';
+  }
+  try {
+    const rows = await supabaseSelect(env, 'user_profiles', {
+      select: 'username,avatar_hash,avatar_version',
+      limit: String(LIMIT),
+    });
+    const items = (rows || [])
+      .map((r) => ({
+        name: maskName(r.username),
+        avatar: r.avatar_hash
+          ? `/api/public/avatar/${r.avatar_hash}?v=${Number(r.avatar_version) || 0}`
+          : null,
+      }))
+      .filter((x) => x.name);
+    return new Response(JSON.stringify({ ok: true, items }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
+    });
+  } catch (err) {
+    console.error('handleRecentUsers failed:', err);
+    return json({ error: 'failed' }, 502);
   }
 }
 
