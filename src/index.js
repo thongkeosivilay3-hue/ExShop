@@ -28,9 +28,8 @@
      อื่นๆ ทั้งหมด                 -> ส่งต่อให้ env.ASSETS (ไฟล์ static เดิม)
 
    ---- ระบบแอดมิน ----
-   ห้องแอดมิน (admin.html) ต้องมี session ที่ isAdmin: true ถึงจะเข้าได้
-   ⚠️ หลังลบล็อกอิน Discord/Google ออกแล้ว ยังไม่มีทางไหนตั้ง isAdmin: true ให้ session
-   (ล็อกอินอีเมลธรรมดาเป็น isAdmin: false เสมอ) — วิธีเข้าห้องแอดมินใหม่ต้องเพิ่มภายหลัง
+   ห้องแอดมิน (admin.html + ไฟล์ admin*.js/css) ส่งให้เฉพาะ session ที่ isAdmin: true เท่านั้น (คนอื่นได้ 404)
+   isAdmin ตัดสินตอนล็อกอินอีเมล/รหัสผ่าน โดยดูว่า user id อยู่ในตาราง public.admin_accounts หรือไม่
 
    ---- Supabase proxy (/api/admin/supabase/*) ----
    admin.js (ผ่าน admin-supabase-config.js) ไม่ถือ Supabase key จริงในเบราว์เซอร์อีกต่อไป
@@ -55,10 +54,42 @@
    Endpoint นี้เป็น public (GET อย่างเดียว, ไม่ต้อง login) เพราะเป็นข้อมูลที่ลูกค้าทุกคนควรเห็นอยู่แล้ว
    ========================================================= */
 
-// อีเมล Discord ที่อนุญาตให้เข้าห้องแอดมินได้ (เพิ่มได้หลายคนโดยเติมในลิสต์นี้)
-const ADMIN_EMAILS = ['bhchhhyggg@gmail.com', 'nuanmm12233@gmail.com'];
+/* ---------- แอดมิน: ตัดสินจากตาราง public.admin_accounts ใน Supabase เท่านั้น ----------
+   (ไม่ใช้ลิสต์อีเมลในโค้ดแล้ว — กันคนสมัครอีเมลเดียวกับแอดมินเก่าแล้วได้สิทธิ์)
+   ตารางนี้เปิด RLS และไม่มี policy จึงอ่านได้เฉพาะ Worker (service role)
+   เพิ่ม/ลบแอดมิน: ต้องแก้ตารางนี้ใน Supabase (มี trigger กันไว้ — ต้องได้รับอนุญาตจากเจ้าของก่อน) */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function isAdminAccount(env, userId) {
+  const id = String(userId || '');
+  if (!UUID_RE.test(id)) return false;
+  try {
+    const rows = await supabaseSelect(env, 'admin_accounts', {
+      select: 'user_id',
+      user_id: 'eq.' + id,
+      limit: '1',
+    }, { timeoutMs: 5000 });
+    return Array.isArray(rows) && rows.length > 0;
+  } catch (err) {
+    console.error('isAdminAccount failed:', err);
+    return false;
+  }
+}
+
+async function getAdminIds(env) {
+  try {
+    const rows = await supabaseSelect(env, 'admin_accounts', { select: 'user_id', limit: '100' }, { timeoutMs: 5000 });
+    return new Set((rows || []).map((r) => String(r.user_id)));
+  } catch (err) {
+    console.error('getAdminIds failed:', err);
+    return new Set();
+  }
+}
 
 const SUPABASE_PROXY_PREFIX = '/api/admin/supabase';
+
+// ไฟล์ของห้องแอดมินทั้งหมด (admin.html + js/css ที่ใช้เฉพาะหน้านั้น) — เสิร์ฟให้เฉพาะแอดมิน
+const ADMIN_ONLY_PATH_RE = /^\/(?:admin(?:\.html)?|admin-glass\.(?:js|css)|admin-supabase-config\.js|admin\.(?:js|css)|coupons-admin\.(?:js|css)|customers-admin\.(?:js|css)|maintenance-admin\.(?:js|css))$/i;
 
 /* ---------- security headers: ใส่ให้ทุก response ที่ตอบกลับ ---------- */
 function withSecurityHeaders(response) {
@@ -166,6 +197,22 @@ async function route(request, env, ctx) {
     }
     if (url.pathname === '/api/account/stats') {
       return handleAccountStats(request, env);
+    }
+
+    // ห้องแอดมิน: หน้า/ไฟล์ของห้องแอดมินส่งให้เฉพาะ session ที่เป็นแอดมินเท่านั้น
+    // คนอื่น (ไม่ล็อกอิน/ลูกค้าทั่วไป) ได้ 404 เหมือนไม่มีหน้านี้อยู่เลย
+    if (ADMIN_ONLY_PATH_RE.test(url.pathname)) {
+      const who = await getSessionUserSafe(request, env);
+      if (!who || !who.isAdmin) {
+        return new Response('Not found', {
+          status: 404,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      }
+      const res = await env.ASSETS.fetch(request);
+      const out = new Response(res.body, res);
+      out.headers.set('Cache-Control', 'no-store');
+      return out;
     }
 
     // path อื่นๆ ทั้งหมด -> เสิร์ฟไฟล์ static เดิม (index.html, style.css, script.js, ...)
@@ -969,7 +1016,7 @@ async function handlePasswordLogin(request, env) {
     username,
     email: authUser.email || email,
     avatar: null,
-    isAdmin: false,
+    isAdmin: await isAdminAccount(env, authUser.id),
     discordLinked: false,
     passwordAuth: true,
     createdAt: Date.now(),
@@ -1807,6 +1854,7 @@ async function handleAdminCustomers(request, env, url) {
       const r = await sbRaw(env, 'POST', 'rpc/admin_customers', { p_q: q || null, p_limit: limit, p_offset: offset });
       if (!r.ok) { console.error('admin_customers failed', r.status, r.text); return json({ error: 'ດຶງລາຍຊື່ລູກຄ້າບໍ່ສຳເລັດ' }, 502); }
       const rows = Array.isArray(r.data) ? r.data : [];
+      const adminIds = await getAdminIds(env);
       return json({
         ok: true,
         total: rows.length ? Number(rows[0].total_count) : 0,
@@ -1814,7 +1862,7 @@ async function handleAdminCustomers(request, env, url) {
           user_id: x.user_id, email: x.email, username: x.username,
           balance: Number(x.balance) || 0, total_topup: Number(x.total_topup) || 0,
           orders_count: Number(x.orders_count) || 0, banned: !!x.banned, last_activity: x.last_activity,
-          is_admin: !!(x.email && ADMIN_EMAILS.includes(String(x.email).toLowerCase())),
+          is_admin: adminIds.has(String(x.user_id)),
         })),
       });
     }
@@ -1845,7 +1893,7 @@ async function handleAdminCustomers(request, env, url) {
     const uid = String(body.user_id || '');
     if (!CUSTOMER_ID_RE.test(uid)) return json({ error: 'user_id ບໍ່ຖືກຕ້ອງ' }, 400);
     const email = body.email ? String(body.email).slice(0, 200) : null;
-    const targetIsAdmin = String(uid) === String(admin.id) || (email && ADMIN_EMAILS.includes(email.toLowerCase()));
+    const targetIsAdmin = String(uid) === String(admin.id) || await isAdminAccount(env, uid);
 
     /* ---- บวก/ลบยอด ---- */
     if (sub === '/adjust') {
