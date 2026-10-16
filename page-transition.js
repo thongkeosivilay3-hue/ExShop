@@ -2,7 +2,7 @@
    page-transition.js
    ควบคุมแอนิเมชั่นตอนสลับหน้า (คู่กับ page-transition.css)
    - หน้าใหม่: ค่อยๆ มุดขึ้นมาอัตโนมัติผ่าน CSS (ไม่ต้องรอ JS)
-   - คลิกลิงก์ภายในเว็บ: ค่อยๆ จางออกก่อน แล้วค่อยเปลี่ยนหน้าจริง
+   - คลิกลิงก์ภายในเว็บ: ม่านสีฟ้าอ่อนค่อยๆ คลุมหน้า แล้วค่อยเปลี่ยนหน้าจริง
    - ใช้ transform/opacity ล้วนๆ กัน jank และเคารพ prefers-reduced-motion
    ========================================================= */
 (function () {
@@ -17,12 +17,17 @@
     }
   } catch (e) {}
 
-  var EXIT_MS = 320; // ต้องตรงกับ .pt-exit ใน page-transition.css
+  var EXIT_MS = 420; // เวลาที่ม่านสีฟ้าอ่อนค่อยๆ คลุมหน้าก่อนเปลี่ยนหน้าจริง
 
   var wrapper = document.querySelector('.shell, .auth-shell');
   if (!wrapper) return;
 
   var navigating = false;
+
+  function removeCover() {
+    var c = document.getElementById('page-exit');
+    if (c && c.parentNode) c.parentNode.removeChild(c);
+  }
 
   // เคลียร์ will-change หลังแอนิเมชั่น "เข้า" จบ กันค้าง GPU layer ทิ้งไว้เฉยๆ
   // ---- สำคัญ: ต้องเคลียร์ animation ตัวเองทิ้งไปด้วย (ไม่ใช่แค่ willChange) ----
@@ -50,6 +55,7 @@
       wrapper.style.transform = '';
       wrapper.style.willChange = 'auto';
       wrapper.style.animation = 'none'; // กันแอนิเมชั่นเข้าเล่นซ้ำ + กัน transform ค้างแบบเดียวกับด้านบน
+      removeCover();
     }
   });
 
@@ -79,8 +85,20 @@
 
     e.preventDefault();
     navigating = true;
-    wrapper.style.willChange = 'transform, opacity';
-    wrapper.classList.add('pt-exit');
+
+    // ม่านสีฟ้าอ่อน (สีเดียวกับหน้าโหลดของหน้าถัดไปเป๊ะ) ค่อยๆ ขึ้นมาคลุมหน้าเดิม
+    // พอหน้าใหม่เปิด overlay จะเป็นสีเดียวกันอยู่แล้ว -> ต่อกันเนียนไม่มีสีกระโดด/กะพริบ
+    var cover = document.createElement('div');
+    cover.id = 'page-exit';
+    cover.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:99999;pointer-events:all;' +
+      'background:' + (window.__plColor || '#cfe8fb') + ';opacity:0;will-change:opacity;' +
+      'transition:opacity ' + EXIT_MS + 'ms cubic-bezier(.4,0,.2,1)';
+    document.documentElement.appendChild(cover);
+    void cover.offsetWidth; // บังคับให้เบราว์เซอร์รับค่าเริ่มต้นก่อน ไม่งั้น transition ไม่เล่น
+    cover.style.opacity = '1';
+
     setTimeout(function () { location.href = href; }, EXIT_MS);
+    // กันค้าง: ถ้าผ่านไป 4 วิแล้วหน้ายังไม่เปลี่ยน (เช่นเบราว์เซอร์ยกเลิกการนำทาง) ให้เอาม่านออกแล้วใช้งานต่อได้
+    setTimeout(function () { navigating = false; removeCover(); }, 4000);
   });
 })();

@@ -9,12 +9,19 @@
 /* หน้าปรากฏตอนโหลดเสร็จ: ค่อยๆ มุดขึ้นมา */
 .shell,
 .auth-shell{
-  animation: pt-in .55s cubic-bezier(.22, 1, .36, 1) both;
+  animation: pt-in .8s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 @keyframes pt-in{
-  from{ opacity:0; transform:translateY(22px); }
+  from{ opacity:0; transform:translateY(14px); }
   to  { opacity:1; transform:translateY(0); }
+}
+
+/* ระหว่างที่หน้าโหลดยังคลุมอยู่ (html.pl-lock) ให้เนื้อหารออยู่ก่อน
+   พอหน้าโหลดเริ่มจางออก (pl-lock ถูกถอด) เนื้อหาจะค่อยๆ ลอยขึ้นมาพร้อมกัน = ซ้อนทับกันเนียน */
+html.pl-lock .shell,
+html.pl-lock .auth-shell{
+  animation-play-state: paused;
 }
 
 /* กดเปลี่ยนหน้า: ค่อยๆ จางออก (เล่นจาก page-transition.js) */

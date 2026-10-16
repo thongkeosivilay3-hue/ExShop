@@ -10,7 +10,9 @@
   var root = document.documentElement;
   var MIN_SHOW_MS = 150;   // โชว์จอฟ้าอ่อนอย่างน้อยเท่านี้ (มิลลิวินาที) กันกระพริบ
   var MAX_WAIT_MS = 8000;  // รอนานสุด แล้วเปิดหน้าให้เลย
-  var EXIT_MS = 700;       // ความยาวเฟดออก (ต้องมากกว่าเวลา transition ในสไตล์ด้านล่าง = .6s)
+  var EXIT_MS = 900;       // เวลารอก่อนลบ overlay (ต้องมากกว่าเวลา transition ในสไตล์ด้านล่าง = .8s)
+  var COLOR = '#cfe8fb';   // สีฟ้าอ่อน — page-transition.js ใช้สีเดียวกันตอนกดลิงก์ เพื่อให้ต่อกันเนียนไม่มีสีกระโดด
+  window.__plColor = COLOR;
   var start = Date.now();
   var done = false;
   var reduced = false;
@@ -19,11 +21,16 @@
   // ---- สไตล์ (ฝังในไฟล์นี้ — ใส่ก่อนสร้าง overlay เสมอ) ----
   var CSS =
     'html.pl-lock{overflow:hidden}' +
-    '#page-loader{position:fixed;top:0;right:0;bottom:0;left:0;z-index:99999;background:#cfe8fb;opacity:1;visibility:visible;' +
+    '#page-loader{position:fixed;top:0;right:0;bottom:0;left:0;z-index:99999;background:' + COLOR + ';opacity:1;visibility:visible;' +
       'animation:pl-failsafe 0s linear 10s forwards}' +
+    // ชั้นสีขาวซ้อนทับ: ตอนออกจะค่อยๆ ขึ้นมาแทนสีฟ้า (ใช้ opacity ล้วนๆ ลื่นกว่าไล่ background-color)
+    '#page-loader::after{content:\"\";position:absolute;top:0;right:0;bottom:0;left:0;background:#fff;opacity:0}' +
     '@keyframes pl-failsafe{to{opacity:0;visibility:hidden;pointer-events:none}}' +
-    '#page-loader.pl-hide,#page-loader.pl-exit{opacity:0;visibility:hidden;pointer-events:none;animation:none;' +
-      'background:#fff;transition:opacity .6s ease,background-color .6s ease,visibility 0s linear .6s}';
+    '#page-loader.pl-exit{opacity:0;visibility:hidden;pointer-events:none;animation:none;' +
+      'transition:opacity .8s cubic-bezier(.4,0,.2,1),visibility 0s linear .8s}' +
+    '#page-loader.pl-exit::after{opacity:1;transition:opacity .8s cubic-bezier(.4,0,.2,1)}' +
+    '#page-loader.pl-hide{opacity:0;visibility:hidden;pointer-events:none;animation:none;' +
+      'transition:opacity .3s ease,visibility 0s linear .3s}';
   var st = document.createElement('style');
   st.id = 'page-loader-style';
   st.appendChild(document.createTextNode(CSS));
