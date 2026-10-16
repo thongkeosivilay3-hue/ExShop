@@ -1180,13 +1180,16 @@ async function handleSupabaseProxy(request, env, url) {
 
   // header ที่ไม่ควร forward ไปตรงๆ: host เดิม, cookie ของเว็บเรา (ไม่เกี่ยวกับ Supabase),
   // และ apikey/authorization ที่เบราว์เซอร์ส่งมา (จะถูกใส่ค่าจริงทับด้านล่างเสมอ)
-  const skipHeaders = new Set(['host', 'cookie', 'apikey', 'authorization', 'content-length']);
+  // user-agent/origin/referer ของเบราว์เซอร์ก็ต้องไม่ส่งต่อด้วย: Supabase ปฏิเสธ secret key (sb_secret_...)
+  // ที่มาพร้อม User-Agent ของเบราว์เซอร์ด้วย 401 — ให้ Worker ส่งในนามเซิร์ฟเวอร์เองแทน
+  const skipHeaders = new Set(['host', 'cookie', 'apikey', 'authorization', 'content-length', 'user-agent', 'origin', 'referer']);
   const headers = new Headers();
   for (const [key, value] of request.headers) {
     if (!skipHeaders.has(key.toLowerCase())) headers.set(key, value);
   }
   headers.set('apikey', env.SUPABASE_SERVICE_ROLE_KEY);
   headers.set('authorization', `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`);
+  headers.set('user-agent', 'dekmashshop-worker/1.0');
 
   const targetUrl = env.SUPABASE_URL.replace(/\/$/, '') + targetPath + url.search;
   const hasBody = !['GET', 'HEAD'].includes(request.method);
