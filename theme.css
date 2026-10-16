@@ -86,20 +86,38 @@ html .rp-card .rp-name{ color:var(--ink); } html .rp-card .rp-buyer,html .rp-car
 html .rp-card::after{ display:none; }
 
 /* ---------- Category cards ---------- */
-html .cat-item,html .cat-banner{ border-radius:24px; }
-html .cat-banner{ background:#fff; border:1px solid var(--card-border); box-shadow:var(--shadow-m); overflow:hidden; }
-html .cat-banner::before{ background:linear-gradient(180deg,rgba(14,34,55,0) 35%,rgba(14,34,55,.55) 100%); }
+/* ---------- Category cards (v5 — ตรงตามภาพอ้างอิง: การ์ดขาวมุมโค้ง 14px, แบนเนอร์ 730:221,
+   ชื่อ + จำนวนคงเหลือซ้าย, ป้ายจำนวนสินค้าทรงแคปซูลขวา). สโคปเฉพาะ .cat-item ภายในการ์ดเท่านั้น ---------- */
+html .cat-item{ display:flex; flex-direction:column; border:0; border-radius:14px; background:#fff; overflow:hidden; outline:none;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:0 1px 2px rgba(23,105,181,.14), 0 4px 10px -2px rgba(23,105,181,.12), 0 10px 18px -10px rgba(14,34,55,.2);
+  transition:opacity .6s var(--ease), transform .28s var(--ease), box-shadow .28s var(--ease); }
+html .cat-banner{ aspect-ratio:730 / 221; border:0; border-radius:0; box-shadow:none; overflow:hidden; background:#e6f3fe; }
+html .cat-banner::before{ background:none; }
 html .cat-banner::after{ display:none; }
-html .cat-banner-bg{ background:linear-gradient(135deg,#e6f3fe,#cfe7fb); }
-html .cat-item{ transition:transform .45s var(--ease); }
-html .cat-item:hover{ transform:translateY(-6px); }
-html .cat-item:hover .cat-banner{ box-shadow:0 26px 50px -22px rgba(23,105,181,.5); border-color:var(--sky-300); }
-html .cat-big-title{ color:#fff; text-shadow:0 2px 14px rgba(14,34,55,.45); font-weight:800; }
-html .cat-tag-row .accent-bar{ background:var(--sky-300); }
-html .cat-meta{ background:rgba(255,255,255,.92); color:var(--ink); border-radius:16px; }
-html .cat-meta-name{ color:var(--ink); } html .cat-meta-count{ color:var(--text-dim); }
-html .cat-meta-arrow{ background:var(--sky-500); color:#fff; }
-html .cat-click{ color:var(--sky-700); }
+html .cat-banner-bg{ background:linear-gradient(135deg,#e6f3fe,#bfe0fa); }
+html .cat-banner-media.has-image{ -webkit-mask-image:none; mask-image:none; }
+html .cat-meta{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:59px; padding:10px 16px 10px 24px;
+  background:#fff; border:0; border-radius:0; color:var(--ink); }
+html .cat-meta-text{ min-width:0; flex:1; }
+html .cat-meta-name{ margin:0; font-size:15px; font-weight:500; line-height:1.25; letter-spacing:.2px; text-transform:uppercase; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+html .cat-meta-count{ margin-top:4px; font-size:13px; font-weight:400; line-height:1.3; color:var(--text-faint);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+html .cat-pill{ flex-shrink:0; padding:8px 14px; border-radius:999px; font-size:13px; font-weight:500; line-height:1; white-space:nowrap;
+  color:var(--sky-700); background:var(--sky-100); }
+@media (hover:hover) and (pointer:fine){
+  html .cat-item:hover{ transform:translateY(-3px);
+    box-shadow:0 2px 4px rgba(23,105,181,.16), 0 8px 16px -2px rgba(23,105,181,.16), 0 18px 28px -12px rgba(14,34,55,.26); }
+  html .cat-item:hover .cat-banner-media img,html .cat-item:hover .cat-img-placeholder{ transform:scale(1.03); }
+}
+html .cat-item:active{ transform:scale(.985); transition-duration:.1s; }
+html .cat-item:focus-visible{ box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--sky-500); }
+@media (prefers-reduced-motion:reduce){
+  html .cat-item,html .cat-banner-media img{ transition:none; }
+  html .cat-item:hover,html .cat-item:active{ transform:none; }
+  html .cat-item:hover .cat-banner-media img,html .cat-item:hover .cat-img-placeholder{ transform:none; }
+}
 html .cat-img-placeholder{ color:var(--sky-500); }
 
 /* ---------- Product cards / category page ---------- */
@@ -182,14 +200,8 @@ html .topup-method,html [class*="chip"],html [class*="amount"]{ border-color:var
 html [class*="chip"].active,html [class*="chip"].selected{ background:var(--sky-50); border-color:var(--sky-500); color:var(--sky-700); }
 
 /* ---------- รอบแก้ 2: ทับส่วนที่ยังเป็นสีดำ/แดงของเดิม ---------- */
-html .cat-item{ background:#fff !important; border:1px solid var(--card-border) !important; border-radius:24px !important; box-shadow:var(--shadow-m) !important; overflow:hidden; }
-html .cat-banner{ border-radius:24px 24px 0 0 !important; border:0 !important; box-shadow:none !important; }
-html .cat-banner-bg{ background:linear-gradient(135deg,#e6f3fe,#bfe0fa) !important; }
-html .cat-banner::before{ background:none !important; }
 html .cat-img-placeholder{ color:var(--sky-700) !important; background:transparent !important; }
 html .cat-img-placeholder span{ color:var(--sky-700) !important; font-weight:800; }
-html .cat-meta{ background:#fff !important; border-radius:0 0 24px 24px !important; border-top:1px solid var(--sky-100); }
-html .cat-item:hover{ border-color:var(--sky-300) !important; box-shadow:0 26px 50px -22px rgba(23,105,181,.5) !important; }
 html .prod-card.grid-card .buy-btn{ background:linear-gradient(135deg,#46aef2,#1f86d6) !important; color:#fff !important; box-shadow:0 8px 18px -8px rgba(31,134,214,.7) !important; }
 html .prod-card.grid-card .buy-btn:disabled{ background:#e3eaf2 !important; color:#8a9bb0 !important; box-shadow:none !important; }
 html .prod-card.grid-card .prod-media{ background:linear-gradient(135deg,#eaf4fd,#cfe5f8) !important; color:var(--sky-500); }
@@ -250,11 +262,11 @@ html .stat-card:hover,html .why-card:hover,html .rp-card:hover{ background-image
 html .prod-card:hover .prod-body,html .prod-card.is-hot .prod-body{ background-image:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(140,203,247,.28),transparent 65%); }
 /* กรอบแสงหมุนรอบการ์ดสินค้า/หมวดหมู่เมื่อชี้ */
 html .prod-card,html .cat-item{ position:relative; }
-html .prod-card::after,html .cat-item::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; padding:2px; pointer-events:none; opacity:0; z-index:5;
+html .prod-card::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; padding:2px; pointer-events:none; opacity:0; z-index:5;
   background:conic-gradient(from var(--ring),transparent 0 55%,#8ccbf7 75%,#2f9be8 88%,transparent 100%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
   transition:opacity .4s; animation:ringSpin 3.2s linear infinite; }
-html .prod-card:hover::after,html .cat-item:hover::after,html .prod-card.is-hot::after{ opacity:1; }
+html .prod-card:hover::after,html .prod-card.is-hot::after{ opacity:1; }
 /* ริปเปิลปุ่ม */
 html .btn,html .buy-btn,html .login-btn{ position:relative; overflow:hidden; }
 .fx-ripple{ position:absolute; border-radius:50%; background:rgba(255,255,255,.55); transform:scale(0); animation:ripple .65s ease-out forwards; pointer-events:none; }

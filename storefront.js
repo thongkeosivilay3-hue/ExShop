@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       : `
         <div class="cat-img-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
-          <span>ໃສ່ຮູບພາບໝວດໝູ່ນີ້<br>ຂະໜາດ 1600×560px (ອັດຕາສ່ວນ 2.86:1)</span>
+          <span>ໃສ່ຮູບພາບໝວດໝູ່ນີ້<br>ຂະໜາດ 1600×484px (ອັດຕາສ່ວນ 3.3:1)</span>
         </div>`;
 
     // ໝາຍເຫດ v4: ຕາມການຮ້ອງຂໍ, ເອົາອອກທັງໝົດ — ແຖບປ້າຍນ້ອຍ (v3), ຫົວຂໍ້ໃຫຍ່
@@ -67,33 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="cat-banner">
           <div class="cat-banner-bg"></div>
           <div class="cat-banner-media${category.image ? ' has-image' : ''}">${mediaHTML}</div>
-          <div class="cat-glare"></div>
         </div>
         <div class="cat-meta">
           <div class="cat-meta-text">
             <div class="cat-meta-name">${escapeHtml(category.name)}</div>
-            <div class="cat-meta-count">${productCount.toLocaleString('en-US')} ລາຍການ • ຄົງເຫຼືອ ${stockCount.toLocaleString('en-US')} ຊິ້ນ</div>
+            <div class="cat-meta-count">ຄົງເຫຼືອ ${stockCount.toLocaleString('en-US')} ຊິ້ນ</div>
           </div>
-          <div class="cat-meta-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </div>
+          <span class="cat-pill">${productCount.toLocaleString('en-US')} ສິນຄ້າ</span>
         </div>
       </a>`;
   }
-
-  // ແຖບແສງນຸ້ມໆທີ່ຕິດຕາມເມົາສ໌ເທິງກາຕູນ (.cat-glare) — ໃຊ້ delegation ຢູ່ນອກ
-  // renderCategories() ຄັ້ງດຽວ ເພາະ innerHTML ຖືກສ້າງໃໝ່ທຸກຄັ້ງທີ່ fetch ຂໍ້ມູນ
-  // (ຖ້າຜູກໃສ່ກາຕູນເລີຍ, ຈະຫາຍໄປພ້ອມກັບ innerHTML ເກົ່າ). ບໍ່ມີຜົນຫຍັງເທິງມືຖື —
-  // CSS ເປີດ .cat-glare ສະເພາະ @media (hover:hover) and (pointer:fine) ຢູ່ແລ້ວ
-  stack.addEventListener('pointermove', (e) => {
-    const item = e.target.closest('.cat-item');
-    if (!item) return;
-    const rect = item.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    item.style.setProperty('--mx', x + '%');
-    item.style.setProperty('--my', y + '%');
-  });
 
   function renderCategories(data) {
     stack.innerHTML = data.categories.map((category) => {
