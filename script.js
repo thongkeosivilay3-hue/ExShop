@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* ---------- Contact modal (popup ຕອນກົດ chat FAB) ----------
+  /* ---------- Contact cards (ເລື່ອນມາຈາກຊ້າຍ ຕອນກົດ chat FAB) ----------
      ດຶງລິ້ງແທ້ຈາກ /api/public/storefront -> store.social (ອິງຄ່າທີ່ແອດມິນຕັ້ງໄວ້ໃນ
      ຫ້ອງແອດມິນ ຊ່ອງທາງໂຊເຊียล — social_facebook / social_discord / social_line /
      social_telegram / social_whatsapp). ຊ່ອງທາງໃດແອດມິນຍັງບໍ່ໄດ້ໃສ່ລິ້ງ (null/ຫວ່າງ)
@@ -69,82 +69,72 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(str || '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
 
-  function contactLinksHTML(social) {
+  function contactCardsHTML(social) {
     const entries = Object.keys(SOCIAL_META)
       .map((key) => ({ key, ...SOCIAL_META[key], href: social && String(social[key] || '').trim() }))
       .filter((l) => l.href);
 
     if (!entries.length) {
-      return `<p class="contact-modal-empty">ຮ້ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າຊ່ອງທາງຕິດຕໍ່ — ເຂົ້າ "ຫ້ອງແອດມິນ &gt; ຊ່ອງທາງໂຊເຊียล" ເພື່ອເພີ່ມລິ້ງ</p>`;
+      return `<div class="contact-card contact-card-empty" style="--i:0">ຮ້ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າຊ່ອງທາງຕິດຕໍ່</div>`;
     }
 
-    return `<div class="contact-modal-links">${entries.map((l) => `
-      <a class="contact-link" href="${escHtml(l.href)}" target="_blank" rel="noopener">
+    return entries.map((l, i) => `
+      <a class="contact-card" style="--i:${i}" href="${escHtml(l.href)}" target="_blank" rel="noopener">
         <span class="contact-link-icon" style="background:${l.color}">${l.icon}</span>
         <span class="contact-link-name">${escHtml(l.name)}</span>
         <svg class="contact-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
       </a>
-    `).join('')}</div>`;
+    `).join('');
   }
 
-  let contactModalOverlay = null;
+  /* การ์ดช่องทางติดต่อ: เลื่อนเข้ามาจากขอบซ้ายของจอ (ไม่มี popup/overlay ดำ) */
+  let contactCardsEl = null;
+  let contactCardsBackdrop = null;
 
-  function buildContactModal(storeName, social) {
-    const name = (storeName || document.querySelector('.brand-name, .brand-name-inline')?.textContent || '').trim() || 'ຮ້ານຄ້າ';
-    const logoImg = document.querySelector('.logo img');
+  function closeContactCards() {
+    contactCardsEl?.classList.remove('show');
+    contactCardsBackdrop?.classList.remove('show');
+  }
 
-    const overlay = document.createElement('div');
-    overlay.className = 'contact-modal-overlay';
-    overlay.innerHTML = `
-      <div class="contact-modal" role="dialog" aria-modal="true" aria-label="ຊ່ອງທາງຕິດຕໍ່">
-        <button type="button" class="contact-modal-close" id="contactModalClose" aria-label="ປິດ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
-        </button>
-        <div class="contact-modal-logo">
-          ${logoImg ? `<img src="${logoImg.src}" alt="${escHtml(name)}">` : `
-          <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
-        </div>
-        <h3 class="contact-modal-title">${escHtml(name)}</h3>
-        <p class="contact-modal-sub">ຊ່ອງທາງຕິດຕໍ່ &amp; ໂຊເຊียล</p>
-        ${contactLinksHTML(social)}
-      </div>
-    `;
-    document.body.appendChild(overlay);
+  function buildContactCards(social) {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'contact-cards-backdrop';
+    backdrop.addEventListener('click', closeContactCards); // กดนอกการ์ดให้ปิด
 
-    const closeModal = () => {
-      overlay.classList.remove('show');
-      document.body.classList.remove('contact-modal-open');
-    };
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeModal(); // ກົດພື້ນທີ່ນອກກ່ອງ ໃຫ້ປິດ
-    });
-    overlay.querySelector('#contactModalClose').addEventListener('click', closeModal);
+    const wrap = document.createElement('div');
+    wrap.className = 'contact-cards';
+    wrap.setAttribute('aria-label', 'ຊ່ອງທາງຕິດຕໍ່');
+    wrap.innerHTML = contactCardsHTML(social);
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(wrap);
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') closeContactCards();
     });
 
-    return overlay;
+    contactCardsBackdrop = backdrop;
+    return wrap;
   }
 
   const chatFab = document.querySelector('.chat-fab');
   if (chatFab) {
     chatFab.addEventListener('click', async () => {
-      if (!contactModalOverlay) {
-        let storeName = null;
+      if (!contactCardsEl) {
         let social = null;
         try {
-          // StorefrontData ດຶງ/cache ຈາກ /api/public/storefront ຢູ່ແລ້ວ (storefront-data.js) —
-          // ຮຽກຊ້ຳຢູ່ນີ້ຈະບໍ່ຍິງ request ໃໝ່ຖ້າໜ້ານັ້ນເຄີຍດຶງໄປແລ້ວ
+          // StorefrontData ດຶງ/cache ຈາກ /api/public/storefront ຢູ່ແລ້ວ (storefront-data.js)
           const data = await window.StorefrontData.fetchData();
-          storeName = data?.store?.name || null;
           social = data?.store?.social || null;
         } catch (err) {
-          console.error('Contact modal: fetchData failed', err);
+          console.error('Contact cards: fetchData failed', err);
         }
-        contactModalOverlay = buildContactModal(storeName, social);
+        contactCardsEl = buildContactCards(social);
+        void contactCardsEl.offsetWidth; // ให้ transition เริ่มจากตำแหน่งนอกจอ
       }
-      contactModalOverlay.classList.add('show');
-      document.body.classList.add('contact-modal-open');
+      // กดปุ่มแชทซ้ำ = เปิด/ปิดสลับกัน
+      const willShow = !contactCardsEl.classList.contains('show');
+      contactCardsEl.classList.toggle('show', willShow);
+      contactCardsBackdrop.classList.toggle('show', willShow);
     });
   }
 
