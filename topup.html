@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html lang="lo">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<script src="page-loader.js"></script>
+<link rel="stylesheet" href="page-loader.css">
+<title>ເຕີມເງິນ</title>
+<link href="style.css?v=20261009a" rel="stylesheet"/>
+<link href="tabbar-close-fx.css?v=20261004b" rel="stylesheet"/>
+<link href="page-transition.css" rel="stylesheet"/>
+<link href="topup-waiting.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;display=swap" rel="stylesheet"/></noscript>
+<link href="weather-fx.css?v=20261011a" rel="stylesheet"/>
+</head>
+<body>
+<div class="shell">
+<!-- Header (ຄືກັນກັບໜ້າອື່ນ) -->
+<header>
+<div class="brand">
+<div class="logo has-custom-logo">
+<img alt="logo" src="assets/logo.png"/>
+</div>
+<span class="brand-name en"></span>
+</div>
+<button class="login-btn" type="button">
+<svg fill="currentColor" viewbox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"></path></svg>
+<span>ລົງຊື່ເຂົ້າໃຊ້</span>
+</button>
+</header>
+<main class="topup-main">
+<!-- ========== STEP 1: ເລືອກວິທີ + ຈຳນວນເງິນ ========== -->
+<section id="topupStepAmount">
+<div class="topup-title-row">
+<button aria-label="ກັບໄປໜ້າຫຼັກ" class="topup-back-btn" data-nav-href="index.html" type="button">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>
+</button>
+<h1 class="display-lo">ເຕີມເງິນ</h1>
+</div>
+<p class="topup-label">ເລືອກວິທີເຕີມເງິນ</p>
+<div class="topup-methods" id="topupMethods">
+<button class="topup-method active" data-bank="1" type="button">
+<div class="topup-method-icon has-logo">
+<img alt="BCEL One" src="assets/bcelone-logo.png"/>
+</div>
+<div>
+<div class="topup-method-name" id="topupMethodName1">ກຳລັງໂຫຼດ...</div>
+<div class="topup-method-sub">ໂອນຜ່ານທະນາຄານນີ້</div>
+</div>
+<div class="topup-method-check">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
+</div>
+</button>
+<button class="topup-method u-hidden" data-bank="2" id="topupMethod2" type="button">
+<div class="topup-method-icon">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="6"></rect><path d="M2 10h20"></path></svg>
+</div>
+<div>
+<div class="topup-method-name" id="topupMethodName2">ທະນາຄານ ການຄ້າຕ່າງປະເທດ</div>
+<div class="topup-method-sub">ໂອນຜ່ານທະນາຄານນີ້</div>
+</div>
+<div class="topup-method-check">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
+</div>
+</button>
+</div>
+<div class="topup-card">
+<div class="topup-card-head">
+<div class="topup-card-icon has-logo">
+<img alt="BCEL One" src="assets/bcelone-logo.png"/>
+</div>
+<div class="topup-card-head-text">
+<b id="topupBankTitle">ໂອນ QR ທະນາຄານ ພັດທະນາລາວ</b>
+<p id="topupBankDesc">ສະແກນ QR ຮັບເງິນຂອງຮ້ານ ຜ່ານແອັບທະນາຄານ ແລ້ວອັບໂຫຼດສະລິບເພື່ອລໍຖ້າແອດມິນກວດສອບ</p>
+</div>
+</div>
+<div class="topup-amount-summary">
+<div class="sum-label">ຈຳນວນເງິນທີ່ເລືອກ</div>
+<div class="sum-value" id="topupSumValue">— ₭</div>
+</div>
+<div class="topup-picker-wrap">
+<div class="topup-picker-hint" id="topupPickerHint">
+<span>ແຕະ ₭20 ເພື່ອເບິ່ງຕົວເລືອກທັງໝົດ</span>
+<span class="arrow"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg></span>
+</div>
+<div class="topup-presets" id="topupPresets">
+<button class="topup-preset first" data-amount="20" type="button"><span class="cur">₭</span>20K</button>
+<button class="topup-preset" data-amount="50" type="button"><span class="cur">₭</span>50K</button>
+<button class="topup-preset" data-amount="100" type="button"><span class="cur">₭</span>100K</button>
+<button class="topup-preset" data-amount="200" type="button"><span class="cur">₭</span>200K</button>
+<button class="topup-preset" data-amount="500" type="button"><span class="cur">₭</span>500K</button>
+<button class="topup-preset wide" data-amount="1000" type="button"><span class="cur">₭</span>1,000K</button>
+</div>
+<div class="topup-custom-divider"><span>ຫຼື ພິມຈຳນວນເອງ</span></div>
+<div class="topup-custom-wrap">
+<span class="topup-custom-cur">₭</span>
+<input autocomplete="off" class="topup-custom-input" id="topupCustomAmount" inputmode="numeric" maxlength="6" placeholder="0" type="text"/>
+<span class="topup-custom-suffix">.000</span>
+</div>
+<div class="topup-custom-hint">ພິມສະເພາະໂຕເລກ ຈະຄິດເປັນ (ໂຕເລກ × 1.000 ₭) ໃຫ້ອັດຕະໂນມັດ — ຕົວຢ່າງ: ພິມ 35 = 35.000 ₭</div>
+</div>
+<button class="topup-submit" disabled="" id="topupCreateQrBtn" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="20" rx="2" width="14" x="5" y="2"></rect><path d="M12 18h.01"></path></svg>
+          ສ້າງ QR ໂອນເງິນ
+        </button>
+<p class="topup-note">ແຕະ ₭20 ເພື່ອເບິ່ງທຸກຕົວເລືອກ ຫຼື ເລືອກຍອດເງິນ ແລ້ວກົດສ້າງ QR</p>
+</div>
+<div class="topup-guide">
+<p class="topup-label">ວິທີເຕີມເງິນຜ່ານ QR ຮ້ານ</p>
+<ol>
+<li><span class="num">1</span><span>ກອກຈຳນວນເງິນທີ່ຕ້ອງການເຕີມ ແລ້ວກົດ "ສ້າງ QR ໂອນເງິນ"</span></li>
+<li><span class="num">2</span><span>ສະແກນ QR ດ້ວຍແອັບທະນາຄານ ແລ້ວໂອນຕາມຍອດທີ່ລະບຸໃຫ້ຖືກຕ້ອງ</span></li>
+<li><span class="num">3</span><span>ອັບໂຫຼດຮູບສະລິບການໂອນ ແລ້ວກົດ "ຢືນຢັນການໂອນເງິນ"</span></li>
+<li><span class="num">4</span><span>ແອດມິນຈະກວດສອບ ແລະ ຍອດເງິນຈະເຂົ້າບັນຊີທ່ານພາຍໃນບໍ່ດົນ</span></li>
+</ol>
+</div>
+</section>
+<!-- ========== STEP 2: QR + ອັບໂຫຼດສະລິບ ========== -->
+<section class="u-hidden" id="topupStepPay">
+<button aria-label="ປ່ຽນຈຳນວນເງິນ" class="topup-back-btn u-mb-16" id="topupBackToAmount" type="button">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>
+</button>
+<div class="topup-card topup-pay-amount-card u-mb-20">
+<div class="lbl">ຍອດທີ່ຕ້ອງໂອນ</div>
+<div class="val" id="topupPayAmount">0 ₭</div>
+</div>
+<div class="topup-card u-mb-22">
+<div class="topup-qr-frame">
+<div class="topup-qr-box" id="topupQrBox">[ QR ຮັບເງິນ ]</div>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+<div class="scanline"></div>
+</div>
+<p class="topup-qr-hint">ສະແກນ QR ດ້ານເທິງດ້ວຍແອັບທະນາຄານ ແລ້ວໂອນຕາມຍອດທີ່ລະບຸໃຫ້ຖືກຕ້ອງ</p>
+</div>
+<p class="topup-label">ອັບໂຫຼດສະລິບການໂອນ</p>
+<label class="topup-upload" id="topupUploadLabel">
+<input accept="image/*" class="u-hidden" id="topupSlipInput" type="file"/>
+<img alt="" class="topup-upload-preview" id="topupUploadPreviewImg"/>
+<svg fill="none" id="topupUploadIcon" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+<div class="fname" id="topupSlipName">ກົດເພື່ອເລືອກຮູບສະລິບ</div>
+<div class="fhint">ຮອງຮັບ JPG, PNG</div>
+</label>
+<button class="topup-submit" disabled="" id="topupConfirmBtn" type="button">
+        ຢືນຢັນການໂອນເງິນ
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+</section>
+<!-- ========== STEP 3: ລໍຖ້າກວດສອບ ========== -->
+<section class="u-hidden" id="topupStepWaiting">
+<div class="topup-card tuw-card" data-state="pending" id="tuwCard">
+<div class="tuw-glow" id="tuwGlow"></div>
+
+<div class="tuw-toast" id="tuwToast">
+<svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L2.8 17a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" id="tuwToastIcon"></path></svg>
+<span id="tuwToastText">ແອດມິນກຳລັງກວດສະລິບຂອງທ່ານ</span>
+</div>
+
+<div class="tuw-icon-orb" id="tuwIcon"></div>
+
+<h2 id="tuwHeadline">ກຳລັງລໍຖ້າການກວດສອບ</h2>
+<p id="tuwSub">ແອດມິນຈະກວດສະລິບການໂອນຂອງທ່ານ<br/>ແລະຢືນຢັນຍອດເງິນເຂົ້າບັນຊີໃນໄວໆນີ້</p>
+
+<div class="tuw-timeline">
+<div class="tuw-node done"><svg fill="none" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#2ecc71" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"></path></svg></div>
+<div class="tuw-line lit"></div>
+<div class="tuw-node current" id="tuwNode2"><svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="12" fill="#ffb020" r="4"></circle></svg></div>
+<div class="tuw-line" id="tuwLine2"></div>
+<div class="tuw-node" id="tuwNode3"><svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="12" fill="#555" r="3"></circle></svg></div>
+</div>
+<div class="tuw-timeline-labels">
+<span>ສົ່ງລາຍການ</span><span id="tuwStep2Label">ກຳລັງກວດສອບ</span><span>ເຕີມເງິນສຳເລັດ</span>
+</div>
+
+<div class="topup-waiting-info">
+<div class="row"><span>ລະຫັດອ້າງອີງ</span><b id="topupRef">-</b></div>
+<div class="row"><span>ຍອດເງິນ</span><b id="topupWaitAmount">-</b></div>
+<div class="row status"><span>ສະຖານະ</span><b id="tuwStatusChip">ລໍຖ້າກວດສອບ</b></div>
+</div>
+</div>
+<div class="tuw-btn-row">
+<a class="topup-submit" href="topup-history.html">ເບິ່ງປະຫວັດເຕີມເງິນ</a>
+<button class="topup-submit topup-submit-alt" data-nav-href="index.html" type="button">
+        ກັບໄປໜ້າຫຼັກ
+      </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer>
+<div class="footer-logo logo"></div>
+<div class="fname en"></div>
+<div class="fsocial" id="footer-social"></div>
+<div class="fcopy">© 2026 <span class="fcopy-name en"></span> . ຄວາມເປັນສ່ວນຕົວ</div>
+</footer>
+</div>
+<script src="page-transition.js"></script>
+<script src="nav-links.js"></script>
+<script src="storefront-data.js"></script>
+<script src="tabbar-close-fx.js?v=20261004b"></script>
+<script src="script.js?v=20261009a"></script>
+<script src="topup.js"></script>
+<script src="weather-fx.js?v=20261011a" defer></script>
+</body>
+</html>

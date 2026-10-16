@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<script src="page-loader.js"></script>
+<link rel="stylesheet" href="page-loader.css">
+<title>ໝວດໝູ່ສິນຄ້າ</title>
+<link rel="stylesheet" href="style.css?v=20261014m">
+<link rel="stylesheet" href="tabbar-close-fx.css?v=20261004b">
+<link rel="stylesheet" href="page-transition.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Noto+Sans+Lao+Looped:wght@600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Noto+Sans+Lao+Looped:wght@600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet"/></noscript>
+<link href="weather-fx.css?v=20261011a" rel="stylesheet"/>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo has-custom-logo">
+        <img src="assets/logo.png" alt="logo">
+      </div>
+      <span class="brand-name en"></span>
+    </div>
+    <button type="button" class="login-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"/></svg>
+      <span>ລົງຊື່ເຂົ້າໃຊ້</span>
+    </button>
+  </header>
+
+  <!-- Back link -->
+  <a class="page-back" href="index.html#categories">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    ກັບໄປເລືອກໝວດໝູ່
+  </a>
+
+  <!-- Category title / description (filled in by category.js) -->
+  <section class="cat-page-head">
+    <h1 class="cat-page-title display-lo is-loading" id="cat-title">ກຳລັງໂຫຼດ...</h1>
+    <p class="cat-page-desc is-loading" id="cat-desc">ກຳລັງໂຫຼດ...</p>
+  </section>
+
+  <!-- Search within this category -->
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="search-input" placeholder="ຄົ້ນຫາສິນຄ້າ...">
+  </div>
+
+  <!-- Product grid: populated for the current category only -->
+  <div class="prod-grid" id="prod-grid"></div>
+
+  <!-- Shown when the category has no products yet -->
+  <div class="empty-state" id="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 7L12 3 4 7l8 4 8-4Z"/><path d="M4 7v10l8 4 8-4V7"/></svg>
+    <p>ຍັງບໍ່ມີສິນຄ້າໃນໝວດນີ້<br>ກະລຸນາກັບມາເບິ່ງພາຍຫຼັງ</p>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo logo"></div>
+    <div class="fname en"></div>
+    <div class="fsocial" id="footer-social"></div>
+    <div class="fcopy">© 2026 <span class="fcopy-name en"></span> . ຄວາມເປັນສ່ວນຕົວ</div>
+  </footer>
+
+</div>
+<!-- storefront-data.js: ດຶງຂໍ້ມູນຮ້ານຈິງ (ໝວດໝູ່/ສິນຄ້າ/ສະຕັອກ) ຈາກ /api/public/storefront,
+                        ໃຊ້ຮ່ວມກັນກັບ index.html
+     category.js: ອ່ານ ?cat= ຈາກ URL, ດຶງ+ສ້າງກາຕູນສິນຄ້າຈິງ, ຄຸມການຄົ້ນຫາ/ປຸ່ມຊື້ ດ້ວຍຕົນເອງ
+     script.js: login-state / chat fab / interaction ອື່ນໆຂອງໜ້າ -->
+<script src="page-transition.js"></script>
+<script src="storefront-data.js"></script>
+<script src="category.js?v=20261014m"></script>
+<script src="prod-card-beam.js"></script>
+<script src="tabbar-close-fx.js?v=20261004b"></script>
+<script src="script.js?v=20261009a"></script>
+<script src="weather-fx.js?v=20261011a" defer></script>
+</body>
+</html>

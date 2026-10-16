@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="lo">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<script src="page-loader.js"></script>
+<link rel="stylesheet" href="page-loader.css">
+<title>ລາຍລະອຽດສິນຄ້າ</title>
+<link href="style.css?v=20261009a" rel="stylesheet"/>
+<link href="tabbar-close-fx.css?v=20261004b" rel="stylesheet"/>
+<link href="product.css?v=20261011a" rel="stylesheet"/>
+<link href="page-transition.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;display=swap" rel="stylesheet"/></noscript>
+<link href="weather-fx.css?v=20261011a" rel="stylesheet"/>
+</head>
+<body class="product-page">
+<div class="shell">
+<!-- Header (ຄືກັນກັບໜ້າອື່ນໆໃນເວັບ) -->
+<header>
+<div class="brand">
+<div class="logo has-custom-logo">
+<img alt="logo" src="assets/logo.png"/>
+</div>
+<span class="brand-name en"></span>
+</div>
+<button class="login-btn" type="button">
+<svg fill="currentColor" viewbox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"></path></svg>
+<span>ລົງຊື່ເຂົ້າໃຊ້</span>
+</button>
+</header>
+<!-- Back button + Breadcrumb -->
+<nav class="page-nav">
+<a class="page-back" href="index.html#categories" id="backLink">
+<span class="pb-arrow"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg></span>
+      ກັບໄປໜ້າຮ້ານ
+    </a>
+<div class="page-nav-divider"></div>
+<div class="breadcrumb">
+<a href="index.html">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path></svg>
+        ໜ້າຫຼັກ
+      </a>
+<span class="bc-sep u-hidden" id="breadcrumbCatSep">›</span>
+<a class="u-hidden" href="index.html#categories" id="breadcrumbCatLink"></a>
+<span class="bc-sep">›</span>
+<span class="bc-current" id="breadcrumbCurrent">ກຳລັງໂຫຼດ...</span>
+</div>
+</nav>
+<!-- Loading state -->
+<div class="prod-page-loading" id="loadingState">ກຳລັງໂຫຼດ...</div>
+<!-- Error state (ບໍ່ພົບສິນຄ້າ / ດຶງຂໍ້ມູນບໍ່ສຳເລັດ) -->
+<div class="prod-page-error u-hidden" id="errorState">
+<svg fill="none" stroke="currentColor" stroke-width="1.6" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+<p id="errorMsg">ບໍ່ພົບສິນຄ້ານີ້</p>
+<a class="error-back-btn" href="index.html#categories">ກັບໄປໜ້າຮ້ານ</a>
+</div>
+<!-- Main product content (ຕື່ມດ້ວຍ product.js ຫຼັງໂຫຼດຂໍ້ມູນສຳເລັດ) -->
+<div class="u-hidden" id="prodContent">
+<div class="prod-hero">
+<span class="hud-corner tl"></span><span class="hud-corner br"></span>
+<img alt="" class="u-hidden" id="prodImg" src=""/>
+<div class="prod-hero-placeholder" id="prodImgPlaceholder">
+<svg fill="none" stroke="currentColor" stroke-width="1.6" viewbox="0 0 24 24"><rect height="15" rx="2" width="18" x="3" y="4"></rect><circle cx="8.5" cy="9.5" r="1.5"></circle><path d="M21 15l-5-5-9 9"></path></svg>
+</div>
+</div>
+<div class="prod-title-wrap">
+<div class="prod-title display-lo" id="prodTitle"></div>
+</div>
+<div class="badge-row" id="badgeRow"></div>
+<!-- ຕົວເລືອກໄລຍະເວລາ (ສະແດງສະເພາະສິນຄ້າແບບ duration_enabled) -->
+<div class="section u-hidden" id="optionsSection">
+<div class="section-head">
+<span class="section-label">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 11-14h-7l1-6Z"></path></svg>
+          ຕົວເລືອກສິນຄ້າ
+          <span class="section-count" id="optCount">0</span>
+</span>
+<span class="section-selected" id="selectedLabel"></span>
+</div>
+<div class="opt-list" id="optList"></div>
+</div>
+<hr class="div"/>
+<div class="section">
+<div class="price-label">ລາຄາ</div>
+<div class="price-value" id="priceValue">₭ 0</div>
+</div>
+<div class="section">
+<div class="price-label u-mb-10">ຈຳນວນ</div>
+<div class="qty-row">
+<button class="qty-btn" id="qtyMinus" type="button">−</button>
+<span class="qty-value" id="qtyValue">1</span>
+<button class="qty-btn" id="qtyPlus" type="button">+</button>
+<!-- ຊ່ອງໃສ່ໂຄ້ດສ່ວນຫຼຸດ (ຕຳແໜ່ງຂ້າງປຸ່ມຈຳນວນ) — ຄວບຄຸມໂດຍ product.js, ຮຽກ POST /api/coupons/validate -->
+<div class="coupon-inline" id="couponBox">
+<div class="coupon-field" id="couponField">
+<svg class="coupon-ico" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M3 9a2 2 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a2 2 0 0 1 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1Z"></path><path d="M9 5v14" stroke-dasharray="2 3"></path></svg>
+<input autocapitalize="characters" autocomplete="off" autocorrect="off" class="coupon-input en" id="couponInput" maxlength="32" placeholder="ໂຄ້ດສ່ວນຫຼຸດ" spellcheck="false" type="text"/>
+</div>
+<button class="coupon-btn" id="couponBtn" type="button">ໃຊ້ໂຄ້ດ</button>
+</div>
+</div>
+<div class="coupon-msg" id="couponMsg" role="status"></div>
+<div class="stock-note" id="stockNote"></div>
+</div>
+<div class="buy-bar">
+<div class="buy-bar-total">
+<span class="lbl">ລວມທັງໝົດ</span>
+<span class="old u-hidden" id="totalOld">₭ 0</span>
+<span class="val" id="totalValue">₭ 0</span>
+</div>
+<button class="buy-btn" id="buyBtn" type="button">
+<svg fill="none" viewbox="0 0 24 24"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6.2" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path><circle cx="10" cy="21" fill="#fff" r="1.4"></circle><circle cx="17.5" cy="21" fill="#fff" r="1.4"></circle></svg>
+<span id="buyBtnText">ຊື້ເລີຍ</span>
+</button>
+</div>
+<div class="section prod-desc-section">
+<div class="section-head">
+<span class="section-label">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg>
+          ລາຍລະອຽດ
+        </span>
+</div>
+<div class="prod-desc-box" id="prodDescBox">ບໍ່ມີລາຍລະອຽດສິນຄ້າ</div>
+</div>
+</div>
+<!-- Footer -->
+<footer>
+<div class="footer-logo logo"></div>
+<div class="fname en"></div>
+<div class="fsocial" id="footer-social"></div>
+<div class="fcopy">© 2026 <span class="fcopy-name en"></span> . ຄວາມເປັນສ່ວນຕົວ</div>
+</footer>
+<!-- Code-receiving sheet (ຫຼັງສັ່ງຊື້ສຳເລັດ/ບໍ່ສຳເລັດ) — ຄວບຄຸມໂດຍ product.js -->
+<div class="cs-overlay" id="codeSheetOverlay">
+<div aria-modal="true" class="cs-sheet" role="dialog">
+<div class="cs-grabber"></div>
+<div class="cs-scroll" id="codeSheetScroll"></div>
+</div>
+</div>
+</div>
+<script src="page-transition.js"></script>
+<script src="storefront-data.js"></script>
+<script src="product.js?v=20261011a"></script>
+<script src="tabbar-close-fx.js?v=20261004b"></script>
+<script src="script.js?v=20261009a"></script>
+<script src="weather-fx.js?v=20261011a" defer></script>
+</body>
+</html>

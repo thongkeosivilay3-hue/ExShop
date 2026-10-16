@@ -1,0 +1,34 @@
+name = "dekmashshop"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# กันไม่ให้ทุกครั้งที่ deploy ไปลบตัวแปร (Variables) ที่ตั้งไว้ใน Cloudflare Dashboard
+# เช่น SUPABASE_SERVICE_ROLE_KEY / DISCORD_WEBHOOK_URL — ถ้าไม่มีบรรทัดนี้ deploy จาก GitHub จะเขียนทับจนระบบพัง
+keep_vars = true
+
+[assets]
+directory = "./"
+binding = "ASSETS"
+# ให้ Worker ทำงานก่อนทุกคำขอ (รวมหน้า .html) — ถ้าไม่มีบรรทัดนี้ Cloudflare จะเสิร์ฟ
+# ไฟล์ static ตรงๆ โดยไม่ผ่าน Worker ทำให้หน้า "ปิดปรับปรุง" ไม่เคยแสดงให้ลูกค้า
+run_worker_first = true
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "74ffa29122634c6f9cd4db4d71c40a56"
+
+[vars]
+# URL โปรเจกต์ Supabase (ไม่ใช่ข้อมูลลับ — ตั้งในนี้ได้เลย)
+SUPABASE_URL = "https://jkykjiluuaflrpwlinws.supabase.co"
+
+# ⚠️ SUPABASE_SERVICE_ROLE_KEY ห้ามใส่ในไฟล์นี้เด็ดขาด (จะเข้า git ทันที)
+# ต้องตั้งแยกด้วยคำสั่ง (รันครั้งเดียว ใส่ค่าตอน prompt ถาม):
+#   wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+# เอาค่ามาจาก Supabase Dashboard > Settings > API > service_role (secret)
+
+# ⚠️ DISCORD_WEBHOOK_URL ก็ห้ามใส่ในไฟล์นี้เช่นกัน (เป็น secret ที่ยิงข้อความเข้าห้องได้)
+# ใช้สำหรับแจ้งเตือนเข้า Discord ทุกครั้งที่มีคนสมัคร/ล็อกอินด้วยอีเมล หรือเติมเงิน (ไม่ใช่ระบบล็อกอิน)
+# ต้องตั้งแยกด้วยคำสั่ง (รันครั้งเดียว ใส่ค่าตอน prompt ถาม):
+#   wrangler secret put DISCORD_WEBHOOK_URL
+# เอาค่ามาจาก: Discord > ตั้งค่าช่องที่ต้องการ (แนะนำสร้างช่องใหม่ เช่น #alerts) >
+# Edit Channel > Integrations > Webhooks > New Webhook > Copy Webhook URL

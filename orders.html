@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="lo">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<script src="page-loader.js"></script>
+<link rel="stylesheet" href="page-loader.css">
+<title>ປະຫວັດການສັ່ງຊື້</title>
+<link href="style.css?v=20261009a" rel="stylesheet"/>
+<link href="tabbar-close-fx.css?v=20261004b" rel="stylesheet"/>
+<link href="orders.css" rel="stylesheet"/>
+<link href="page-transition.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;family=Outfit:wght@500;600;700;800&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;family=Outfit:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/></noscript>
+<link href="weather-fx.css?v=20261011a" rel="stylesheet"/>
+</head>
+<body>
+<div class="shell">
+<!-- Header (ຄືກັນກັບໜ້າອື່ນ) -->
+<header>
+<div class="brand">
+<div class="logo has-custom-logo">
+<img alt="logo" src="assets/logo.png"/>
+</div>
+<span class="brand-name en"></span>
+</div>
+<button class="login-btn" type="button">
+<svg fill="currentColor" viewbox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"></path></svg>
+<span>ລົງຊື່ເຂົ້າໃຊ້</span>
+</button>
+</header>
+<main class="oh-main">
+<div class="oh-title-row">
+<button aria-label="ກັບໄປໜ້າຫຼັກ" class="oh-back-btn" data-nav-href="index.html" type="button">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>
+</button>
+<h1 class="display-lo">ປະຫວັດການສັ່ງຊື້</h1>
+</div>
+<p class="oh-sub">ລາຍການສັ່ງຊື້ ແລະ ສະຖານະສິນຄ້າຂອງທ່ານ</p>
+<!-- ---------- Stat cards ---------- -->
+<div class="oh-stats">
+<div class="oh-stat">
+<div class="oh-stat-head">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M20 7L12 3 4 7l8 4 8-4Z"></path><path d="M4 7v10l8 4 8-4V7"></path></svg>
+          ລາຍການທັງໝົດ
+        </div>
+<div class="oh-stat-value" id="ohStatTotal">0</div>
+</div>
+</div>
+<!-- ---------- List / loading / empty state ---------- -->
+<div class="oh-loading" id="ohLoading">ກຳລັງໂຫຼດ...</div>
+<div class="oh-empty u-hidden" id="ohEmpty">
+<div class="oh-empty-icon">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+</div>
+<h2>ຍັງບໍ່ມີປະຫວັດການສັ່ງຊື້</h2>
+<p>ເລີ່ມຕົ້ນຊື້ສິນຄ້າໄດ້ເລີຍ!</p>
+<button class="oh-empty-btn" data-nav-href="index.html" type="button">
+<svg fill="none" height="16" stroke="#2a0a0a" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24" width="16"><path d="M6 6h15l-1.5 9h-12L6 6Z"></path><path d="M6 6 5 2H2"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle></svg>
+        ໄປທີ່ຮ້ານຄ້າ
+      </button>
+</div>
+<div class="oh-list u-hidden" id="ohList"></div>
+</main>
+<!-- Footer -->
+<footer>
+<div class="footer-logo logo"></div>
+<div class="fname en"></div>
+<div class="fsocial" id="footer-social"></div>
+<div class="fcopy">© 2026 <span class="fcopy-name en"></span> . ຄວາມເປັນສ່ວນຕົວ</div>
+</footer>
+</div>
+<!-- ป๊อปอัปรายละเอียดคำสั่งซื้อ (เปิดจากปุ่ม "ເບິ່ງຄີ" ในแต่ละการ์ด) -->
+<div class="oh-ov" id="ohModal" role="dialog" aria-modal="true" aria-hidden="true">
+<div class="oh-modal" id="ohModalBody"></div>
+</div>
+<script src="page-transition.js"></script>
+<script src="nav-links.js"></script>
+<script src="storefront-data.js"></script>
+<script src="tabbar-close-fx.js?v=20261004b"></script>
+<script src="script.js?v=20261009a"></script>
+<script src="orders.js"></script>
+<script src="weather-fx.js?v=20261011a" defer></script>
+</body>
+</html>

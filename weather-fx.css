@@ -1,0 +1,34 @@
+/* =========================================================
+   weather-fx.css — สภาพอากาศเป็น "พื้นหลังเว็บ" + แสงแดงสะท้อน (ทุกหน้า)
+   ทำงานร่วมกับ weather-fx.js
+   ชั้นหลังเนื้อหา (z-index ติดลบ): tint -3 / glow -2 / canvas หลัง -1
+   ชั้นหน้า: canvas หน้า z 35 (มีแค่บางเม็ดที่ลอยผ่านจอ) — ใต้ header (40) และป๊อปอัป (50+)
+   ทุกชั้น pointer-events:none ไม่ขวางการกด
+   ========================================================= */
+
+/* ทำให้พื้นหลังหน้าเว็บโปร่งใส เพื่อเห็นสภาพอากาศที่อยู่ด้านหลัง (html ยังเป็นสีดำ #000 อยู่) */
+html.wfx-on body,
+html.wfx-on .shell,
+html.wfx-on .p-body{ background:transparent !important; }
+
+/* กันกระตุก: backdrop-filter (เบลอกระจก) ต้องคำนวณใหม่ทุกเฟรมเมื่อพื้นหลังขยับ -> ปิดไว้ แล้วเพิ่มความทึบแถบแทน */
+html.wfx-on *{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+html.wfx-on header{ background:rgba(12,12,12,.84); }
+html.wfx-on .tabbar{ background:rgba(18,18,18,.92); }
+html.wfx-on .oh-ov.open{ background:rgba(0,0,0,.86); }
+
+/* การ์ดกึ่งโปร่งใส: ให้เห็นสภาพอากาศผ่านการ์ดจางๆ (ตัวอักษรยังอ่านชัด) */
+html.wfx-on{ --card:rgba(8,8,8,.74); --bg-raise:rgba(10,10,10,.74); }
+html.wfx-on .oh-item{ background:rgba(5,5,5,.74); }
+
+.wfx-back,
+.wfx-front{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; contain:strict;
+}
+.wfx-back{ z-index:-1; }
+.wfx-front{ z-index:35; }
+/* ให้แคนวาสหิมะเป็นเลเยอร์ GPU ของตัวเอง: ตอนเลื่อนหน้าเว็บ เบราว์เซอร์แค่เลื่อนเลเยอร์ ไม่ต้องวาดหิมะใหม่ทั้งหน้า (กันหิมะวูบหาย/กระตุก) */
+.wfx-back,
+.wfx-front{ will-change:transform; transform:translateZ(0); backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+@media print{ .wfx-back, .wfx-front{ display:none; } }

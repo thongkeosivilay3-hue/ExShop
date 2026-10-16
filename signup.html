@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html lang="lo">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+<script src="page-loader.js"></script>
+<link rel="stylesheet" href="page-loader.css">
+<title>ສະໝັກສະມາຊິກ</title>
+<link href="auth.css" rel="stylesheet"/>
+<link href="page-transition.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Noto+Sans+Lao+Looped:wght@600;700;800&amp;family=Orbitron:wght@600;700;800;900&amp;family=Rajdhani:wght@500;600;700&amp;family=Lilita+One&amp;display=swap" rel="stylesheet"/></noscript>
+<link href="weather-fx.css?v=20261011a" rel="stylesheet"/>
+</head>
+<body>
+<div class="auth-shell">
+<a class="auth-back" href="index.html">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>
+    ກັບໜ້າຫຼັກ
+  </a>
+<div class="auth-crest">
+<div class="auth-crest-inner">
+<img alt="logo" src="assets/logo.png"/>
+</div>
+</div>
+<div class="auth-brand en"></div>
+<div class="auth-tagline">ສ້າງບັນຊີໃໝ່ ໃຊ້ເວລາບໍ່ເຖິງນາທີ</div>
+<div class="auth-card-wrap">
+<div class="auth-card">
+<div class="auth-card-title">ສະໝັກສະມາຊິກ</div>
+<div class="auth-card-sub">ສ້າງບັນຊີເພື່ອເລີ່ມສັ່ງຊື້ ແລະ ຮັບໂປຣໂມຊັ່ນພິເສດ</div>
+<form id="signup-form" novalidate="">
+<div class="field" id="signup-username-field">
+<label for="signup-username">ຊື່ຜູ້ໃຊ້</label>
+<div class="field-input">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
+<input autocomplete="username" id="signup-username" placeholder="ຊື່ທີ່ໃຊ້ໃນລະບົບ" required="" type="text"/>
+</div>
+<div class="field-error"></div>
+</div>
+<div class="field" id="signup-email-field">
+<label for="signup-email">ອີເມວ</label>
+<div class="field-input">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><rect height="14" rx="2" width="18" x="3" y="5"></rect><path d="m3 7 9 6 9-6"></path></svg>
+<input autocomplete="email" id="signup-email" placeholder="you@example.com" required="" type="email"/>
+</div>
+<div class="field-error"></div>
+</div>
+<div class="field" id="signup-password-field">
+<label for="signup-password">ລະຫັດຜ່ານ</label>
+<div class="field-input">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><rect height="9" rx="2" width="16" x="4" y="11"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+<input autocomplete="new-password" id="signup-password" placeholder="ຢ່າງໜ້ອຍ 6 ໂຕ" required="" type="password"/>
+<button aria-label="ສະແດງລະຫັດຜ່ານ" class="field-toggle" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+<div class="field-error"></div>
+</div>
+<div class="field" id="signup-password2-field">
+<label for="signup-password2">ຢືນຢັນລະຫັດຜ່ານ</label>
+<div class="field-input">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><rect height="9" rx="2" width="16" x="4" y="11"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+<input autocomplete="new-password" id="signup-password2" placeholder="ພິມລະຫັດຜ່ານອີກຄັ້ງ" required="" type="password"/>
+<button aria-label="ສະແດງລະຫັດຜ່ານ" class="field-toggle" type="button">
+<svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+<div class="field-error"></div>
+</div>
+<div class="field-row u-flex-start">
+<label class="check-row">
+<input id="signup-terms" type="checkbox"/>
+            ຂ້ອຍຍອມຮັບ <a class="link-muted u-ml-4" href="#">ເງື່ອນໄຂການນຳໃຊ້</a>
+</label>
+</div>
+<button class="btn-block btn-submit" type="submit">ສ້າງບັນຊີ</button>
+</form>
+</div>
+</div>
+<div class="auth-switch">ມີບັນຊີແລ້ວ? <a href="login.html">ລົງຊື່ເຂົ້າໃຊ້</a></div>
+<div class="auth-terms">ການດຳເນີນການຕໍ່ ຖືວ່າທ່ານຍອມຮັບ <a href="#">ເງື່ອນໄຂການນຳໃຊ້</a> ແລະ <a href="#">ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ</a></div>
+</div>
+<script src="page-transition.js"></script>
+<script src="storefront-data.js"></script>
+<script src="auth.js"></script>
+<script src="weather-fx.js?v=20261011a" defer></script>
+</body>
+</html>

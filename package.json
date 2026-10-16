@@ -1,0 +1,10 @@
+{
+  "name": "dekmashshop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Dekmash Shop — static site + Cloudflare Worker (Supabase backend)",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  }
+}
