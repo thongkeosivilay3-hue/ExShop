@@ -75,11 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
       .filter((l) => l.href);
 
     if (!entries.length) {
-      return `<div class="contact-card contact-card-empty" style="--i:0">ຮ້ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າຊ່ອງທາງຕິດຕໍ່</div>`;
+      return `<div class="cxs-item cxs-empty" style="--i:0">ຮ້ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າຊ່ອງທາງຕິດຕໍ່</div>`;
     }
 
     return entries.map((l, i) => `
-      <a class="contact-card" style="--i:${i}" href="${escHtml(l.href)}" target="_blank" rel="noopener">
+      <a class="cxs-item" style="--i:${i}" href="${escHtml(l.href)}" target="_blank" rel="noopener">
         <span class="contact-link-icon" style="background:${l.color}">${l.icon}</span>
         <span class="contact-link-name">${escHtml(l.name)}</span>
         <svg class="contact-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
@@ -98,11 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function buildContactCards(social) {
     const backdrop = document.createElement('div');
-    backdrop.className = 'contact-cards-backdrop';
+    backdrop.className = 'cxs-backdrop';
     backdrop.addEventListener('click', closeContactCards); // กดนอกการ์ดให้ปิด
 
     const wrap = document.createElement('div');
-    wrap.className = 'contact-cards';
+    wrap.className = 'cxs-tray';
     wrap.setAttribute('aria-label', 'ຊ່ອງທາງຕິດຕໍ່');
     wrap.innerHTML = contactCardsHTML(social);
 
