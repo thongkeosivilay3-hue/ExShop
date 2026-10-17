@@ -413,3 +413,19 @@ html body .prod-card .prod-media.is-soldout::after{
     #fff 100%);
 }
 html body .cat-meta{ position:relative; z-index:2; margin-top:-1px; }
+
+
+/* =========================================================
+   Footer (โลโก้ + ชื่อร้าน + ลิขสิทธิ์) ให้ติดอยู่ "ข้างล่างสุด" ทุกหน้า
+   - หน้าที่เนื้อหาสั้น (เช่น ประวัติการสั่งซื้อที่ยังไม่มีรายการ) footer จะถูกดันลงไปชิดล่างจอ
+     ไม่ลอยกลางจออีกต่อไป
+   - หน้าที่เนื้อหายาว footer จะต่อท้ายเนื้อหาตามปกติ (เว้นระยะ 40px จากเนื้อหาเหมือนเดิม)
+   ========================================================= */
+html body .shell{
+  display:flex; flex-direction:column;
+  min-height:100vh; min-height:100dvh;          /* dvh = ความสูงจริงที่เห็นบน iOS (ไม่รวมแถบ Safari) */
+}
+html body .shell > *{ min-width:0; }
+html body .shell > footer{ margin-top:auto; flex-shrink:0; }
+html body .shell > :has(+ footer){ margin-bottom:40px; }
+html body .shell > .legal-wrap{ width:100%; }   /* เดิมใช้ margin:auto เลยหดในแนวนอนเมื่ออยู่ใน flex */
