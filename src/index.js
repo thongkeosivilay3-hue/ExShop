@@ -89,7 +89,7 @@ async function getAdminIds(env) {
 const SUPABASE_PROXY_PREFIX = '/api/admin/supabase';
 
 // ไฟล์ของห้องแอดมินทั้งหมด (admin.html + js/css ที่ใช้เฉพาะหน้านั้น) — เสิร์ฟให้เฉพาะแอดมิน
-const ADMIN_ONLY_PATH_RE = /^\/(?:admin(?:\.html)?|admin-glass\.(?:js|css)|admin-supabase-config\.js|admin\.(?:js|css)|coupons-admin\.(?:js|css)|customers-admin\.(?:js|css)|maintenance-admin\.(?:js|css))$/i;
+const ADMIN_ONLY_PATH_RE = /^\/(?:admin(?:\.html)?|admin-glass\.(?:js|css)|admin-supabase-config\.js|admin\.(?:js|css)|coupons-admin\.(?:js|css)|customers-admin\.(?:js|css)|maintenance-admin\.(?:js|css)|discord-admin\.js)$/i;
 
 /* ---------- security headers: ใส่ให้ทุก response ที่ตอบกลับ ---------- */
 function withSecurityHeaders(response) {
@@ -125,6 +125,11 @@ async function route(request, env, ctx) {
     // ปุ่มปิด/เปิดเว็บ (โหมดปิดปรับปรุง) — เฉพาะแอดมิน
     if (url.pathname === '/api/admin/maintenance') {
       return handleMaintenance(request, env);
+    }
+
+    // ตั้งค่าลิ้ง Discord Webhook สำหรับแจ้งเตือนตอนมีคนเติมเงิน — เฉพาะแอดมิน
+    if (url.pathname === '/api/admin/discord' || url.pathname === '/api/admin/discord/test') {
+      return handleAdminDiscord(request, env, url);
     }
 
     // เช็คสถานะปิด/เปิดเว็บ (public) — ต้องอยู่ก่อน maintenanceGate เพื่อให้หน้าปิดปรับปรุงเช็คได้ว่าเว็บเปิดกลับมาหรือยัง
@@ -1223,6 +1228,189 @@ function json(data, status) {
   });
 }
 
+/* ---------- ลิ้ง Discord Webhook แจ้งเตือนเติมเงิน (ตั้งได้จากห้องแอดมิน > แจ้งเตือน Discord) ----------
+   เก็บใน Supabase ตาราง site_settings (key = 'discord_topup_webhook', value = { url, enabled, by, at })
+   แบบเดียวกับสถานะปิดปรับปรุง; ถ้าตารางยังใช้ไม่ได้ (404) สำรองไว้ใน KV (SESSIONS)
+   ลิ้งเป็นความลับ (ใครมีลิ้งก็ยิงข้อความเข้าห้องได้) -> API ไม่เคยส่งลิ้งเต็มกลับไปที่เบราว์เซอร์ ส่งแค่ตัวย่อ */
+const DISCORD_DB_KEY = 'discord_topup_webhook';
+const DISCORD_KV_KEY = 'discord:topup_webhook';
+const DISCORD_WEBHOOK_RE = /^https:\/\/(?:discord(?:app)?\.com|ptb\.discord\.com|canary\.discord\.com)\/api(?:\/v\d+)?\/webhooks\/\d+\/[A-Za-z0-9._-]+$/;
+const DISCORD_CACHE_MS = 15000;
+let discordCache = null;
+
+/* คืน { configured, url, enabled, at, by } เสมอ */
+async function getDiscordSetting(env, fresh) {
+  const now = Date.now();
+  if (!fresh && discordCache && now - discordCache.at < DISCORD_CACHE_MS) return discordCache.v;
+
+  let value = null;
+  let dbHasRow = false;
+  if (maintSupabaseReady(env)) {
+    try {
+      const base = env.SUPABASE_URL.replace(/\/$/, '');
+      const res = await fetch(
+        `${base}/rest/v1/site_settings?key=eq.${DISCORD_DB_KEY}&select=value,updated_at&limit=1`,
+        { headers: maintSupabaseHeaders(env), signal: AbortSignal.timeout(2500) }
+      );
+      if (res.ok) {
+        const rows = await res.json();
+        const row = Array.isArray(rows) ? rows[0] : null;
+        if (row) {
+          dbHasRow = true;
+          value = Object.assign({}, row.value || {}, { at: row.updated_at || (row.value && row.value.at) || null });
+        }
+      } else {
+        console.error('read discord setting from db failed:', res.status);
+      }
+    } catch (err) {
+      console.error('read discord setting from db failed:', err);
+    }
+  }
+  if (!dbHasRow) {
+    try {
+      const raw = await env.SESSIONS.get(DISCORD_KV_KEY);
+      if (raw) value = JSON.parse(raw);
+    } catch (err) {
+      console.error('read discord setting from kv failed:', err);
+    }
+  }
+
+  const ok = !!(value && typeof value.url === 'string' && DISCORD_WEBHOOK_RE.test(value.url));
+  const v = {
+    configured: ok,
+    url: ok ? value.url : '',
+    enabled: ok ? value.enabled !== false : false,
+    at: (value && value.at) || null,
+    by: (value && value.by) || null,
+  };
+  discordCache = { at: now, v };
+  return v;
+}
+
+/* บันทึก: คืน true/false */
+async function saveDiscordSetting(env, { url, enabled, by }) {
+  const at = new Date().toISOString();
+  const value = { url, enabled, by, at };
+  let dbOk = false;
+  let tableMissing = !maintSupabaseReady(env);
+
+  if (maintSupabaseReady(env)) {
+    try {
+      const base = env.SUPABASE_URL.replace(/\/$/, '');
+      const res = await fetch(`${base}/rest/v1/site_settings?on_conflict=key`, {
+        method: 'POST',
+        headers: maintSupabaseHeaders(env, {
+          'content-type': 'application/json',
+          prefer: 'resolution=merge-duplicates,return=minimal',
+        }),
+        body: JSON.stringify([{ key: DISCORD_DB_KEY, value, updated_at: at }]),
+        signal: AbortSignal.timeout(4000),
+      });
+      if (res.ok) {
+        dbOk = true;
+      } else {
+        console.error('write discord setting to db failed:', res.status, await res.text());
+        if (res.status === 404) tableMissing = true;
+      }
+    } catch (err) {
+      console.error('write discord setting to db failed:', err);
+    }
+    if (!dbOk && !tableMissing) return false;
+  }
+
+  try {
+    if (dbOk) await env.SESSIONS.delete(DISCORD_KV_KEY); // กันค่าเก่าใน KV ซ้ำซ้อน
+    else await env.SESSIONS.put(DISCORD_KV_KEY, JSON.stringify(value));
+  } catch (err) {
+    console.error('write discord setting to kv failed:', err);
+    if (!dbOk) return false;
+  }
+  discordCache = null;
+  return true;
+}
+
+function maskDiscordWebhook(u) {
+  const m = /\/webhooks\/\d+\/([A-Za-z0-9._-]+)$/.exec(u || '');
+  return m ? `discord.com/…/••••${m[1].slice(-4)}` : null;
+}
+
+async function handleAdminDiscord(request, env, url) {
+  const user = await getSessionUserSafe(request, env);
+  if (!user || !user.isAdmin) {
+    return json({ error: 'ບໍ່ມີສິດເຂົ້າເຖິງ — ຕ້ອງລ໋ອກອິນເປັນແອດມິນກ່ອນ' }, 403);
+  }
+  const out = (data, status) => {
+    const res = json(data, status);
+    res.headers.set('Cache-Control', 'no-store');
+    return res;
+  };
+  const view = (st) => ({ configured: st.configured, enabled: st.enabled, hint: maskDiscordWebhook(st.url), at: st.at, by: st.by });
+
+  if (request.method === 'GET' && url.pathname === '/api/admin/discord') {
+    return out(view(await getDiscordSetting(env, true)));
+  }
+  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  // กัน CSRF จากฟอร์มข้ามเว็บ: ต้องเป็น JSON เท่านั้น (ฟอร์มข้ามเว็บส่ง application/json โดยไม่ผ่าน preflight ไม่ได้)
+  if (!/application\/json/i.test(request.headers.get('content-type') || '')) {
+    return json({ error: 'ຂໍ້ມູນບໍ່ຖືກຕ້ອງ' }, 415);
+  }
+  let body;
+  try { body = await request.json(); } catch { body = null; }
+  if (!body || typeof body !== 'object') return json({ error: 'ຂໍ້ມູນບໍ່ຖືກຕ້ອງ' }, 400);
+
+  const by = user.username || user.email || null;
+
+  if (url.pathname === '/api/admin/discord/test') {
+    const st = await getDiscordSetting(env, true);
+    if (!st.configured) return out({ error: 'ຍັງບໍ່ໄດ້ຕັ້ງຄ່າລິ້ງ Discord' }, 400);
+    try {
+      const res = await fetch(st.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embeds: [{
+          title: '✅ ທົດສອບແຈ້ງເຕືອນ Discord',
+          description: 'ຖ້າເຫັນຂໍ້ຄວາມນີ້ ແປວ່າການແຈ້ງເຕືອນເຕີມເງິນເຊື່ອມຕໍ່ສຳເລັດແລ້ວ',
+          color: 0x2ecc71,
+          fields: [{ name: 'ສົ່ງໂດຍ', value: String(by || 'admin'), inline: true }],
+          timestamp: new Date().toISOString(),
+        }] }),
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) {
+        console.error('discord test failed:', res.status);
+        const why = res.status === 404 ? 'ລິ້ງນີ້ຖືກລຶບແລ້ວ ຫຼື ບໍ່ຖືກຕ້ອງ' : `Discord ຕອບກັບ ${res.status}`;
+        return out({ error: 'ສົ່ງບໍ່ສຳເລັດ: ' + why }, 502);
+      }
+      return out({ ok: true });
+    } catch (err) {
+      console.error('discord test failed:', err);
+      return out({ error: 'ສົ່ງບໍ່ສຳເລັດ: ເຊື່ອມຕໍ່ Discord ບໍ່ໄດ້' }, 502);
+    }
+  }
+
+  const cur = await getDiscordSetting(env, true);
+  let next;
+  if (body.clear === true) {
+    next = { url: '', enabled: false, by };
+  } else {
+    const given = typeof body.url === 'string' ? body.url.trim() : '';
+    if (given && !DISCORD_WEBHOOK_RE.test(given)) {
+      return out({ error: 'ລິ້ງບໍ່ຖືກຕ້ອງ — ຕ້ອງເປັນລິ້ງ Webhook ຂອງ Discord (https://discord.com/api/webhooks/...)' }, 400);
+    }
+    const urlNew = given || cur.url;
+    if (!urlNew) return out({ error: 'ກະລຸນາໃສ່ລິ້ງ Discord Webhook' }, 400);
+    next = {
+      url: urlNew,
+      enabled: typeof body.enabled === 'boolean' ? body.enabled : (cur.configured ? cur.enabled : true),
+      by,
+    };
+  }
+  if (!(await saveDiscordSetting(env, next))) {
+    return out({ error: 'ບັນທຶກບໍ່ໄດ້ ກະລຸນາລອງໃໝ່ອີກຄັ້ງ' }, 502);
+  }
+  return out(view(await getDiscordSetting(env, true)));
+}
+
 /* ---------- helper: ສົ່ງແຈ້ງເຕືອນເຂົ້າ Discord (webhook) ----------
    ใช้แจ้งเตือนแอดมินในช่อง Discord ทุกครั้งที่มีคน "ล็อกอิน" (ทั้ง Discord OAuth และ
    อีเมล/รหัสผ่าน) หรือ "เติมเงิน" (ส่งสลิปเข้ามารออนุมัติ)
@@ -1232,8 +1420,21 @@ function json(data, status) {
    Webhook URL
    ถ้ายังไม่ได้ตั้งค่า (env.DISCORD_WEBHOOK_URL ว่าง) ฟังก์ชันนี้จะข้ามเงียบๆ โดยไม่ทำให้
    ระบบล็อกอิน/เติมเงินพังไปด้วย (แจ้งเตือนคือ best-effort เสริม ไม่ใช่ core flow) */
-async function sendDiscordAlert(env, { title, description, color, fields }) {
-  if (!env.DISCORD_WEBHOOK_URL) return; // ยังไม่ได้ตั้งค่า -> ข้ามไปเฉยๆ
+async function sendDiscordAlert(env, { title, description, color, fields, topup }) {
+  let hookUrl = env.DISCORD_WEBHOOK_URL;
+  // แจ้งเตือนเติมเงิน: ถ้าแอดมินตั้งลิ้งไว้ในห้องแอดมิน ใช้ลิ้งนั้น (ปิดสวิตช์ = ไม่ส่งเลย); ถ้ายังไม่เคยตั้ง ใช้ secret เดิม
+  if (topup) {
+    try {
+      const st = await getDiscordSetting(env, false);
+      if (st && st.configured) {
+        if (!st.enabled) return;
+        hookUrl = st.url;
+      }
+    } catch (err) {
+      console.error('read discord setting failed:', err);
+    }
+  }
+  if (!hookUrl) return; // ยังไม่ได้ตั้งค่า -> ข้ามไปเฉยๆ
 
   const embed = {
     title,
@@ -1244,10 +1445,11 @@ async function sendDiscordAlert(env, { title, description, color, fields }) {
   };
 
   try {
-    await fetch(env.DISCORD_WEBHOOK_URL, {
+    await fetch(hookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ embeds: [embed] }),
+      signal: AbortSignal.timeout(6000),
     });
   } catch (err) {
     // อย่าให้การแจ้งเตือนล้มเหลวไปทำให้ login/topup ของลูกค้าพังตาม — log ไว้เฉยๆ
@@ -2111,6 +2313,7 @@ async function handleTopupConfirm(request, env) {
 
     // ---- แจ้งเตือนเข้า Discord: มีคนส่งสลิปเติมเงินเข้ามา รอแอดมินตรวจสอบ ----
     await sendDiscordAlert(env, {
+      topup: true,
       title: '💰 ມີການເຕີມເງິນເຂົ້າມາໃໝ່ (ລໍຖ້າກວດສອບ)',
       color: 0xff0001, // แดง — เด่นชัด ต้องรีบเข้าไปดู
       description: 'ກົດເຂົ້າໜ້າແອດມິນ (admin.html) ເພື່ອກວດສະລິບ ແລະ ອະນຸມັດ/ປະຕິເສດ',
