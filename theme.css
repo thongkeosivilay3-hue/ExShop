@@ -350,10 +350,10 @@ html .prod-card.grid-card{ --pc-name:var(--ink,#0f2742); --pc-dim:#7a8ca3; --pc-
 html .prod-card.grid-card .prod-sold-tag{
   order:3; align-self:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;
   margin-top:2px; padding:2px 0; border:0; border-radius:0; background:none; box-shadow:none;
-  color:#fff; font-size:12.5px; font-weight:800; line-height:1.2; white-space:nowrap;
-  text-shadow:0 1px 1px rgba(40,90,140,.45); /* ຕົວຂາວລ້ວນ ບໍ່ມີແສງສະທ້ອນ — ເງົາບາງໆເພື່ອໃຫ້ອ່ານອອກເທິງກາດພື້ນຂາວ */
+  color:#2f9be8; font-size:12.5px; font-weight:800; line-height:1.2; white-space:nowrap;
+  text-shadow:none;
 }
-html .prod-card.grid-card .prod-sold-tag .sold-num{ color:#fff; font-weight:800; font-variant-numeric:tabular-nums; }
+html .prod-card.grid-card .prod-sold-tag .sold-num{ color:#1f86d6; font-weight:800; font-variant-numeric:tabular-nums; }
 html .prod-card.grid-card .prod-sold-tag.is-zero{ color:#8a9bb0; text-shadow:none; }
 html .prod-card.grid-card .prod-sold-tag.is-zero .sold-num{ color:#8a9bb0; }
 
@@ -418,7 +418,9 @@ html .prod-card.grid-card .prod-price{
 html .prod-card .prod-media.is-paused,html .prod-card .prod-media.is-soldout{ position:relative; overflow:hidden; padding:0 !important; display:block !important; }
 html .prod-card.grid-card .prod-media.is-paused,html .prod-card .prod-media.is-paused{ background:linear-gradient(165deg,#f7fbff,#e2eefb) !important; color:#2f86d6 !important; }
 html .prod-card.grid-card .prod-media.is-soldout,html .prod-card .prod-media.is-soldout{ background:linear-gradient(165deg,#f5f7fa,#e2e7ee) !important; color:#7c8da3 !important; }
-html .prod-card .prod-media.is-paused svg,html .prod-card .prod-media.is-soldout svg{ opacity:1; animation:none; transform:none; width:100%; height:100%; color:inherit; }
+html .prod-card .prod-media.is-paused .st-glyph svg,html .prod-card .prod-media.is-soldout .st-glyph svg{ opacity:1; animation:none; transform:none; width:100%; height:100%; color:inherit; }
+/* ไอคอนไฟในป้าย "ขายดี!" ต้องเล็กคงที่เสมอ ไม่ว่าการ์ดจะอยู่สถานะไหน */
+html .prod-card .prod-stamp svg{ width:12px !important; height:12px !important; opacity:1 !important; animation:none !important; transform:none !important; flex:none; }
 
 .st-stage{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:8px 12px; text-align:center; }
 .st-icon{ position:relative; width:54px; height:54px; border-radius:50%; background:#fff; display:grid; place-items:center; margin-bottom:2px;

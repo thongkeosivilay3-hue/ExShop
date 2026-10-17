@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'prod-card', 'grid-card',
       isTopSeller ? 'is-top-seller' : '',
     ].filter(Boolean).join(' ');
-    const stampHTML = isTopSeller ? `<div class="prod-stamp">${FLAME_SVG}ຂາຍດີ!</div>` : '';
+    const stampHTML = (isTopSeller && state === 'ok') ? `<div class="prod-stamp">${FLAME_SVG}ຂາຍດີ!</div>` : '';
     return `
       <article class="${cardClass}" data-pid="${escapeHtml(product.id)}">
         <div class="${mediaClass}">
