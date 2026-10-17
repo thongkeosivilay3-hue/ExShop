@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     countTo(document.getElementById('pStatBalance'), user.balance, true, 450);
 
     // ---- Account info rows ----
-    document.getElementById('pInfoEmail').textContent = user.email || 'ບໍ່ມີ';
+    document.getElementById('pInfoEmail').textContent = (user.email && !/@users\.exshop\.app$/i.test(user.email)) ? user.email : 'ບໍ່ມີ';
     document.getElementById('pInfoCreated').textContent = formatDate(user.createdAt);
     document.getElementById('pInfoLastLogin').textContent = formatDate(user.lastLoginAt);
 

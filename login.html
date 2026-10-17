@@ -2,86 +2,18 @@
 <html lang="lo">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<script src="page-loader.js"></script>
-<link rel="stylesheet" href="page-loader.css">
-<title>ລົງຊື່ເຂົ້າໃຊ້</title>
-<link rel="stylesheet" href="auth.css">
-<link rel="stylesheet" href="page-transition.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Noto+Sans+Lao+Looped:wght@600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&family=Noto+Sans+Lao+Looped:wght@600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet"/></noscript>
-
-<link href="theme.css?v=20261016a" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ເຂົ້າສູ່ລະບົບ</title>
+<!-- ໜ້ານີ້ເຫຼືອໄວ້ເພື່ອໃຫ້ລິ້ງເກົ່າ (/login.html?next=...) ຍັງໃຊ້ໄດ້ — ສົ່ງຕໍ່ໄປເປີດ modal ທີ່ໜ້າຫຼັກ -->
+<script>
+(function(){
+  var p=new URLSearchParams(location.search), q=new URLSearchParams();
+  q.set('auth','login');
+  var n=p.get('next'); if(n) q.set('next',n);
+  location.replace('/index.html?'+q.toString());
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=index.html"></noscript>
 </head>
-<body>
-
-<div class="auth-shell">
-
-  <a class="auth-back" href="index.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    ກັບໜ້າຫຼັກ
-  </a>
-
-  <div class="auth-crest">
-    <div class="auth-crest-inner">
-      <img src="assets/logo.png" alt="logo">
-    </div>
-  </div>
-  <div class="auth-brand en"></div>
-  <div class="auth-tagline">ຍິນດີຕ້ອນຮັບກັບຄືນ</div>
-
-  <div class="auth-card-wrap">
-    <div class="auth-card">
-      <div class="auth-card-title">ລົງຊື່ເຂົ້າໃຊ້</div>
-      <div class="auth-card-sub">ເຂົ້າສູ່ບັນຊີຂອງທ່ານເພື່ອສັ່ງຊື້ ແລະ ຕິດຕາມອໍເດີ້</div>
-
-      <form id="login-form" novalidate>
-        <div class="field" id="login-email-field">
-          <label for="login-email">ອີເມວ</label>
-          <div class="field-input">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-            <input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" required>
-          </div>
-          <div class="field-error"></div>
-        </div>
-
-        <div class="field" id="login-password-field">
-          <label for="login-password">ລະຫັດຜ່ານ</label>
-          <div class="field-input">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" required>
-            <button type="button" class="field-toggle" aria-label="ສະແດງລະຫັດຜ່ານ">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <div class="field-error"></div>
-        </div>
-
-        <div class="field-row">
-          <label class="check-row">
-            <input type="checkbox">
-            ຈື່ຈຳຂ້ອຍໄວ້
-          </label>
-          <a class="link-muted" href="#">ລືມລະຫັດຜ່ານ?</a>
-        </div>
-
-        <button type="submit" class="btn-block btn-submit">ລົງຊື່ເຂົ້າໃຊ້</button>
-      </form>
-
-    </div>
-  </div>
-
-  <div class="auth-switch">ຍັງບໍ່ມີບັນຊີ? <a href="signup.html">ສະໝັກສະມາຊິກ</a></div>
-  <div class="auth-terms">ການດຳເນີນການຕໍ່ ຖືວ່າທ່ານຍອມຮັບ <a href="#">ເງື່ອນໄຂການນຳໃຊ້</a> ແລະ <a href="#">ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ</a></div>
-
-</div>
-
-<script src="page-transition.js"></script>
-<script src="storefront-data.js"></script>
-<script src="auth.js"></script>
-
-<script src="theme.js?v=20261016a"></script>
-</body>
+<body></body>
 </html>

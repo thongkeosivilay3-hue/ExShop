@@ -84,3 +84,10 @@
     mo.observe(el,{childList:true,characterData:true,subtree:true});
   });
 })();
+
+/* โหลดฟอร์ม เຂົ້າສູ່ລະບົບ/ສະໝັກສະມາຊິກ แบบเลื่อนขึ้น (auth-modal) ให้ทุกหน้าที่ใช้ theme.js */
+(function(){
+  if(window.__amLoaded) return; window.__amLoaded=1;
+  var l=document.createElement('link'); l.rel='stylesheet'; l.href='/auth-modal.css?v=20261017a'; document.head.appendChild(l);
+  var s=document.createElement('script'); s.src='/auth-modal.js?v=20261017a'; s.defer=true; document.body.appendChild(s);
+})();
