@@ -1,0 +1,46 @@
+/* =========================================================
+   fat-font.css — ฟอนต์อ้วนๆ เท่ๆ ทั้งร้าน (โหลดท้ายสุดของ <head> ทุกหน้าลูกค้า)
+   - ตัวอังกฤษ/ตัวเลข : Lilita One (อ้วน กลม สไตล์เกม)
+   - ตัวลาว           : Noto Sans Lao Looped หนา 800 (ตกลงมาใช้เองอัตโนมัติ เพราะ Lilita ไม่มีตัวลาว)
+   - ใช้เฉพาะหัวข้อ/ปุ่ม/ราคา/ชื่อสินค้า ส่วนข้อความอ่านยาวๆ ยังเป็น Noto Sans Lao เหมือนเดิม
+   - อยากเปลี่ยนฟอนต์ทั้งร้าน แก้ที่ --font-fat บรรทัดเดียว
+   ========================================================= */
+:root{
+  --font-fat:'Lilita One','Noto Sans Lao Looped','Noto Sans Lao',sans-serif;
+}
+
+html body .brand-name,
+html header .brand-name,
+html .brand-name-inline,
+html .fname,
+html h1,
+html h2,
+html h3,
+html .headline,
+html .section-title,
+html .eyebrow-text,
+html .stat-value,
+html .why-title,
+html .cat-name,
+html .prod-name,
+html .prod-title,
+html .p-name,
+html .prod-price,
+html .price,
+html .btn,
+html .btn-block,
+html .btn-submit,
+html .login-btn,
+html .tabbar-label{
+  font-family:var(--font-fat);
+  font-weight:800;          /* ลาวใช้ตัวหนา 800 จริง */
+  font-synthesis:none;      /* Lilita มีน้ำหนักเดียว ห้ามเบราว์เซอร์ทำตัวหนาปลอมจนเละ */
+  letter-spacing:.4px;
+}
+
+/* ชื่อร้านใหญ่ขึ้นนิดให้เด่น */
+html header .brand-name{ font-size:25px; letter-spacing:.6px; }
+
+/* หัวข้อใหญ่: เพิ่มเงานูนเบาๆ ให้ดูอ้วนเด้ง (ข้ามตัวที่ใช้สีไล่เฉด) */
+html h1.headline{ letter-spacing:.5px; }
+html h1.headline .hl{ font-family:var(--font-fat); font-weight:800; font-synthesis:none; }
