@@ -34,13 +34,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     return String(str || '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
 
+  // ไม่มีการ์ดสีขาว + ไม่มีปุ่ม X — เหลือแค่ตัวเลือก "ບໍ່ໂຊວ໌ອີກ" กับปุ่ม "ປິດທັງໝົດ" ลอยใต้รูป (โทนฟ้า)
+  const popupStyle = document.createElement('style');
+  popupStyle.textContent = `
+    .promo-popup .promo-popup-close{ display:none; }
+    .promo-popup .promo-popup-footer{ margin-top:16px; background:none; border:0; border-radius:0; padding:0; box-shadow:none;
+      display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .promo-popup .promo-popup-check-row{ margin:0; padding:9px 16px; border-radius:999px; background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.38); color:#fff; font-weight:500;
+      -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+    .promo-popup .promo-popup-check-row input[type="checkbox"]{ accent-color:#2f9be8; }
+    .promo-popup .promo-popup-close-all{ min-width:170px; padding:12px 28px; border-radius:14px; border:0; color:#fff;
+      background:linear-gradient(135deg,#46aef2,#1f86d6); box-shadow:0 10px 24px -8px rgba(31,134,214,.85); }
+  `;
+  document.head.appendChild(popupStyle);
+
   const overlay = document.createElement('div');
   overlay.className = 'promo-popup-overlay';
   overlay.innerHTML = `
     <div class="promo-popup" role="dialog" aria-modal="true" aria-label="ໂປຣໂມຊັ່ນ">
-      <button type="button" class="promo-popup-close" id="promoPopupCloseX" aria-label="ປິດ">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
-      </button>
       <div class="promo-popup-img-wrap">
         <img src="${escHtml(promo.image)}" alt="ໂປຣໂມຊັ່ນ">
       </div>
@@ -67,7 +79,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => overlay.remove(), 250);
   }
 
-  overlay.querySelector('#promoPopupCloseX').addEventListener('click', closePopup);
   overlay.querySelector('#promoPopupCloseAll').addEventListener('click', closePopup);
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closePopup(); // ກົດພື້ນທີ່ນອກກ່ອງ ໃຫ້ປິດ
