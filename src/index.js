@@ -901,6 +901,20 @@ async function isUserBanned(env, userId) {
    ແບບດຽວກັນກັບ Discord login (ເກັບໃນ env.SESSIONS) ເພື່ອໃຫ້ /api/me, wallets,
    topup, orders ໃຊ້ user id ດຽວກັນໄດ້ທັນທີ */
 
+/* ---------- ล็อกอินด้วย "ຊື່ຜູ້ໃຊ້" ----------
+   Supabase Auth ต้องมีอีเมล → แปลงชื่อผู้ใช้เป็นอีเมลภายใน (hash) ที่ผู้ใช้ไม่เห็น
+   ถ้าเปลี่ยนโดเมนด้านล่าง ต้องเปลี่ยนใน profile.js ด้วย (regex /@users\.exshop\.app$/) */
+const USERNAME_EMAIL_DOMAIN = 'users.exshop.app';
+async function usernameToEmail(username) {
+  const norm = String(username || '').normalize('NFC').trim().toLowerCase();
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(norm));
+  const hex = Array.from(new Uint8Array(buf)).slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `u${hex}@${USERNAME_EMAIL_DOMAIN}`;
+}
+function isInternalEmail(e) {
+  return typeof e === 'string' && e.toLowerCase().endsWith('@' + USERNAME_EMAIL_DOMAIN);
+}
+
 async function handlePasswordSignup(request, env) {
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     return json({ error: 'ລະບົບຍັງບໍ່ໄດ້ຕັ້ງຄ່າ Supabase (SUPABASE_SERVICE_ROLE_KEY)' }, 500);
@@ -914,11 +928,14 @@ async function handlePasswordSignup(request, env) {
   }
 
   const username = (body.username || '').trim();
-  const email = (body.email || '').trim().toLowerCase();
+  const contactEmail = (body.email || '').trim().toLowerCase(); // ອີເມວຕິດຕໍ່ (ບໍ່ບັງຄັບ)
   const password = body.password || '';
 
-  if (username.length < 3) return json({ error: 'ຊື່ຜູ້ໃຊ້ຕ້ອງມີຢ່າງໜ້ອຍ 3 ໂຕ' }, 400);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'ອີເມວບໍ່ຖືກຕ້ອງ' }, 400);
+  if (username.length < 3 || username.length > 24 || username.includes('@')) {
+    return json({ error: 'ຊື່ຜູ້ໃຊ້ຕ້ອງມີ 3–24 ໂຕ ແລະ ບໍ່ມີ @' }, 400);
+  }
+  if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) return json({ error: 'ອີເມວບໍ່ຖືກຕ້ອງ' }, 400);
+  const email = await usernameToEmail(username); // ອີເມວພາຍໃນທີ່ໃຊ້ລ໋ອກອິນຈິງ
   if (password.length < 6) return json({ error: 'ລະຫັດຜ່ານຕ້ອງມີຢ່າງໜ້ອຍ 6 ໂຕ' }, 400);
 
   // ---- ສ້າງຜູ້ໃຊ້ໃໝ່ຜ່ານ Supabase Auth Admin API (ຢືນຢັນອີເມວທັນທີ ບໍ່ຕ້ອງລໍ email link) ----
@@ -933,7 +950,7 @@ async function handlePasswordSignup(request, env) {
       email,
       password,
       email_confirm: true,
-      user_metadata: { username },
+      user_metadata: { username, contact_email: contactEmail || null },
     }),
   });
 
@@ -942,7 +959,7 @@ async function handlePasswordSignup(request, env) {
   if (!createRes.ok) {
     const msg = (createData && createData.msg) || (createData && createData.message) || '';
     if (createRes.status === 422 || /already been registered|already exists/i.test(msg)) {
-      return json({ error: 'ອີເມວນີ້ຖືກສະໝັກໄປແລ້ວ' }, 400);
+      return json({ error: 'ຊື່ຜູ້ໃຊ້ນີ້ຖືກໃຊ້ແລ້ວ' }, 400);
     }
     console.error('handlePasswordSignup: Supabase admin create user failed', createRes.status, createData);
     return json({ error: 'ສະໝັກສະມາຊິກບໍ່ສຳເລັດ, ລອງໃໝ່ພາຍຫຼັງ' }, 502);
@@ -966,7 +983,7 @@ async function handlePasswordSignup(request, env) {
     color: 0xe8b34a, // ทอง
     fields: [
       { name: 'ຊື່', value: username || '-', inline: true },
-      { name: 'ອີເມວ', value: email || '-', inline: true },
+      { name: 'ອີເມວ', value: contactEmail || '-', inline: true },
     ],
   });
 
@@ -985,9 +1002,11 @@ async function handlePasswordLogin(request, env) {
     return json({ error: 'ຂໍ້ມູນທີ່ສົ່ງມາບໍ່ຖືກຕ້ອງ' }, 400);
   }
 
-  const email = (body.email || '').trim().toLowerCase();
+  // ຮັບ username (ໃໝ່) ຫຼື email (ບັນຊີເກົ່າທີ່ສະໝັກດ້ວຍອີເມວ ຍັງລ໋ອກອິນໄດ້)
+  const identifier = String(body.username || body.email || '').trim();
   const password = body.password || '';
-  if (!email || !password) return json({ error: 'ກະລຸນາໃສ່ອີເມວ ແລະ ລະຫັດຜ່ານ' }, 400);
+  if (!identifier || !password) return json({ error: 'ກະລຸນາໃສ່ຊື່ຜູ້ໃຊ້ ແລະ ລະຫັດຜ່ານ' }, 400);
+  const email = identifier.includes('@') ? identifier.toLowerCase() : await usernameToEmail(identifier);
 
   // ---- ຄວາມປອດໄພ: ຈຳກັດຈຳນວນຄັ້ງທີ່ພະຍາຍາມລ໋ອກອິນຜິດ (ກັນ brute-force ເດົາລະຫັດຜ່ານ) ----
   // ນັບແຍກຕາມອີເມວ (ບໍ່ແມ່ນ IP ເພາະ Worker ນີ້ບໍ່ໄດ້ເກັບ IP ໄວ້ໃນ KV ຢູ່ແລ້ວ) ໃຊ້
@@ -1011,7 +1030,7 @@ async function handlePasswordLogin(request, env) {
 
   if (!tokenRes.ok) {
     await bumpRateLimit(env, `loginlimit:${email}`, 15 * 60);
-    return json({ error: 'ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ' }, 400);
+    return json({ error: 'ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ' }, 400);
   }
 
   const authUser = tokenData.user || {};
@@ -1036,7 +1055,7 @@ async function handlePasswordLogin(request, env) {
     color: 0x2ecc71, // เขียว
     fields: [
       { name: 'ຊື່', value: username || '-', inline: true },
-      { name: 'ອີເມວ', value: authUser.email || email || '-', inline: true },
+      { name: 'ອີເມວ', value: isInternalEmail(authUser.email || email) ? ((authUser.user_metadata && authUser.user_metadata.contact_email) || '-') : (authUser.email || email || '-'), inline: true },
     ],
   });
 
