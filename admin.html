@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&amp;family=Rajdhani:wght@500;600;700&amp;family=Chakra+Petch:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 
 <link href="weather-fx.css?v=20261011a" rel="stylesheet"/>
-<link href="admin-glass.css?v=20261017a" rel="stylesheet"/>
+<link href="admin-glass.css?v=20261017b" rel="stylesheet"/>
 </head>
 <body>
 <div class="ambient-glow">
@@ -202,6 +202,14 @@
 <div class="d2-fn-text">
 <div class="d2-fn-title-row"><span class="d2-fn-title">ຕັ້ງຄ່າຮ້ານ</span></div>
 <div class="d2-fn-desc">ໂລໂກ້, ໝວດໝູ່, QR ຮັບເງິນ ແລະ ຊ່ອງທາງໂຊເຊียล</div>
+</div>
+<div class="d2-fn-arrow"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+</div>
+<div class="d2-fn-card" data-goto="panelDiscord">
+<div class="d2-fn-icon" style="--rail-color:#5865f2"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
+<div class="d2-fn-text">
+<div class="d2-fn-title-row"><span class="d2-fn-title">ແຈ້ງເຕືອນ Discord</span></div>
+<div class="d2-fn-desc">ໃສ່ລິ້ງ Webhook ເພື່ອແຈ້ງເຕືອນເວລາມີຄົນເຕີມເງິນ</div>
 </div>
 <div class="d2-fn-arrow"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
 </div>
@@ -781,6 +789,45 @@ IJKL-9012"></textarea></div>
 <!-- /panelSettings -->
 </div></div>
 </div>
+<div class="switch" data-target="panelDiscord">
+<div class="switch-head">
+<span class="switch-icon"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></span>
+<span class="switch-text">
+<span class="dash-title">ແຈ້ງເຕືອນ Discord</span>
+<span class="dash-desc">ລິ້ງ Webhook ສຳລັບແຈ້ງເຕືອນເຕີມເງິນ</span>
+</span>
+<span class="switch-right"><span class="switch-chevron"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></span></span>
+</div>
+<div class="switch-body"><div class="switch-body-inner">
+<!-- ===== PANEL 6: ແຈ້ງເຕືອນ Discord ===== -->
+<div class="panel-content" id="panelDiscord">
+<p class="panel-sub u-panel-sub-margin">ເມື່ອມີລູກຄ້າສົ່ງສະລິບເຕີມເງິນ ລະບົບຈະສົ່ງຂໍ້ຄວາມເຂົ້າຫ້ອງ Discord ທີ່ທ່ານຜູກໄວ້ທັນທີ</p>
+<div class="stat-panel">
+<h3>
+<svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        Discord Webhook
+      </h3>
+<div class="dc-status none" id="dcStatus"><span class="dc-dot"></span><span id="dcStatusText">ກຳລັງກວດສະຖານະ...</span></div>
+<div class="gx-field">
+<label>ລິ້ງ Webhook ຂອງຫ້ອງ Discord (ວາງລິ້ງໃໝ່ເພື່ອປ່ຽນ — ເພື່ອຄວາມປອດໄພ ລະບົບຈະບໍ່ສະແດງລິ້ງເຕັມ)</label>
+<div class="gx-input-wrap"><input autocapitalize="off" autocomplete="off" id="dcUrl" inputmode="url" placeholder="https://discord.com/api/webhooks/..." spellcheck="false" type="url"/></div>
+</div>
+<div class="dc-row"><span>ເປີດແຈ້ງເຕືອນຕອນມີຄົນເຕີມເງິນ</span><button aria-checked="true" aria-label="ເປີດ/ປິດແຈ້ງເຕືອນ" class="dc-switch on" id="dcEnabled" role="switch" type="button"></button></div>
+<button class="gx-submit" id="dcSaveBtn" type="button">
+<span class="gx-spinner"></span>
+<span class="gx-submit-label">ບັນທຶກລິ້ງ</span>
+</button>
+<div class="dc-actions">
+<button class="gx-submit" id="dcTestBtn" type="button" disabled><span class="gx-spinner"></span><span class="gx-submit-label">ສົ່ງທົດສອບ</span></button>
+<button class="gx-submit danger" id="dcClearBtn" type="button" disabled><span class="gx-spinner"></span><span class="gx-submit-label">ລຶບລິ້ງ</span></button>
+</div>
+<div class="gx-msg" id="dcMsg"></div>
+<p class="dc-hint">ວິທີເອົາລິ້ງ: Discord › ຕັ້ງຄ່າຊ່ອງ (Edit Channel) › Integrations › Webhooks › New Webhook › Copy Webhook URL</p>
+</div>
+</div>
+<!-- /panelDiscord -->
+</div></div>
+</div>
 </div>
 </div>
 <!-- /adminApp -->
@@ -797,7 +844,8 @@ IJKL-9012"></textarea></div>
 <script src="coupons-admin.js?v=20261010a"></script>
 <script src="customers-admin.js?v=20261015d"></script>
 <script src="maintenance-admin.js?v=20261014a"></script>
+<script src="discord-admin.js?v=20261017a"></script>
 <script src="weather-fx.js?v=20261011a" defer></script>
-<script src="admin-glass.js?v=20261017a" defer></script>
+<script src="admin-glass.js?v=20261017b" defer></script>
 </body>
 </html>

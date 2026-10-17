@@ -191,3 +191,20 @@ body .mt-card .mt-btn:disabled{opacity:.55}
 body .mt-card.is-error .mt-btn{width:auto;min-width:76px;height:34px;padding:0 16px;font-size:13px;font-weight:800;line-height:34px;color:#fff;background:#6b6b7a}
 body .mt-card.is-error .mt-btn::after{display:none}
 @media (max-width:420px){body .mt-card{flex-direction:row;align-items:center}body .mt-card .mt-btn{width:51px}body .mt-card.is-error .mt-btn{width:auto}}
+
+/* ===== แจ้งเตือน Discord (หน้าแอดมิน) ===== */
+body .dc-status{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;margin:2px 0 14px;line-height:1.4}
+body .dc-dot{width:10px;height:10px;border-radius:50%;background:#8a8a98;flex:none}
+body .dc-status.ok .dc-dot{background:#2ecc71;box-shadow:0 0 10px rgba(46,204,113,.7)}
+body .dc-status.off .dc-dot{background:#e8b34a;box-shadow:0 0 10px rgba(232,179,74,.6)}
+body .dc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 16px;font-size:13px;font-weight:600}
+body .dc-switch{flex:none;width:51px;height:31px;padding:0;border:0;border-radius:99px;position:relative;background:#5a5a66;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);cursor:pointer;transition:background .35s ease,opacity .2s;-webkit-tap-highlight-color:transparent}
+body .dc-switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.35),0 1px 1px rgba(0,0,0,.2);transition:left .4s cubic-bezier(.3,1.35,.5,1),width .25s ease}
+body .dc-switch.on{background:#34c759}
+body .dc-switch.on::after{left:22px}
+body .dc-switch:active::after{width:33px}
+body .dc-switch.on:active::after{left:16px}
+body .dc-switch:disabled{opacity:.55}
+body .dc-actions{display:flex;gap:10px;margin-top:10px}
+body .dc-actions .gx-submit{flex:1;margin-top:0}
+body .dc-hint{font-size:11.5px;line-height:1.7;opacity:.65;margin:14px 0 0}
