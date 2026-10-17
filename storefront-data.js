@@ -18,20 +18,28 @@
 
   // ດຶງຂໍ້ມູນຮ້ານ (cache ໄວ້ໃນ session ນີ້ — ຮຽກຫຼາຍບ່ອນໃນໜ້າດຽວກັນຈະບໍ່ຍິງຊ້ຳ)
   // ໃສ່ force = true ເພື່ອບັງຄັບດຶງໃໝ່ (ເຊັ່ນ ຫຼັງ retry)
+  function requestFresh() {
+    // cache: 'no-store' — บังคับให้ browser ไปดึงข้อมูลจาก network จริงทุกครั้ง
+    // ห้ามใช้ response เก่าที่ browser เคย cache ไว้ (สาเหตุที่ข้อมูลเก่าเคยโผล่มา
+    // แวบหนึ่งตอนรีเฟรชหน้าเว็บ ก่อนจะถูกแทนที่ด้วยข้อมูลจริง)
+    return fetch(ENDPOINT, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+      .then((res) => {
+        if (!res.ok) throw new Error(`storefront endpoint responded ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data && data.error) throw new Error(data.error);
+        return data;
+      });
+  }
+
   function fetchData(force) {
     if (!cachedPromise || force) {
-      // cache: 'no-store' — บังคับให้ browser ไปดึงข้อมูลจาก network จริงทุกครั้ง
-      // ห้ามใช้ response เก่าที่ browser เคย cache ไว้ (สาเหตุที่ข้อมูลเก่าเคยโผล่มา
-      // แวบหนึ่งตอนรีเฟรชหน้าเว็บ ก่อนจะถูกแทนที่ด้วยข้อมูลจริง)
-      cachedPromise = fetch(ENDPOINT, { headers: { Accept: 'application/json' }, cache: 'no-store' })
-        .then((res) => {
-          if (!res.ok) throw new Error(`storefront endpoint responded ${res.status}`);
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.error) throw new Error(data.error);
-          return data;
-        })
+      // page-loader.js เริ่มยิง API ไว้แล้วตั้งแต่บนสุดของ <head> (window.__sfEarly) — หยิบมาใช้เลย
+      // ไม่ต้องยิงซ้ำ (ใช้ได้ครั้งเดียว; ถ้าพลาดจะยิงใหม่ให้ 1 ครั้ง; force = ยิงใหม่เสมอ)
+      const early = !force && window.__sfEarly;
+      window.__sfEarly = null;
+      cachedPromise = (early ? early.catch(() => requestFresh()) : requestFresh())
         .catch((err) => {
           cachedPromise = null; // ບໍ່ cache ຄວາມຜິດພາດ — ໃຫ້ຮຽກໃໝ່ໄດ້ຄັ້ງໜ້າ
           console.error('StorefrontData: fetchData failed', err);
