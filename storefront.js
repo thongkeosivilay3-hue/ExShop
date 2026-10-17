@@ -78,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </a>`;
   }
 
-  // ປັບຄວາມສູງການ໌ດໝວດໝູ່ອັດຕະໂນມັດຕາມອັດຕາສ່ວນຂອງຮູບ (ພໍດີກັບຮູບ ບໍ່ຕັດບໍ່ຍືດ)
-  // ແຕ່ຈຳກັດໄວ້ບໍ່ໃຫ້ສູງເກີນ (CAT_MIN_RATIO) ຫຼືເຕ້ຍເກີນ (CAT_MAX_RATIO) -- ເກີນນັ້ນຈະ crop ແບບ cover
-  // ຖ້າຢາກໃຫ້ການ໌ດສູງຂຶ້ນ/ຕ່ຳລົງ ໃຫ້ແກ້ສອງຄ່ານີ້ (ກວ້າງ ÷ ສູງ)
-  const CAT_MIN_RATIO = 2.8;   // ສູງສຸດ = ກວ້າງ / 2.8
-  const CAT_MAX_RATIO = 4.2;   // ຕ່ຳສຸດ = ກວ້າງ / 4.2
+  // ปรับความสูงการ์ดหมวดหมู่ตามสัดส่วนรูปจริงให้พอดีเป๊ะ (ไม่ crop ไม่ยืด)
+  // เดิมจำกัดสัดส่วนไว้ที่ 2.8–4.2 → รูปที่อยู่นอกช่วงนี้จะโดนตัดขอบ (object-fit:cover)
+  // ตอนนี้ใช้สัดส่วนจริงของรูป และจำกัดเฉพาะค่าสุดโต่งเท่านั้น
+  const CAT_MIN_RATIO = 1.0;   // การ์ดสูงสุด = จัตุรัส (กว้าง = สูง)
+  const CAT_MAX_RATIO = 8.0;   // การ์ดเตี้ยสุด = กว้าง ÷ 8 (กันภาพแบนผิดปกติ)
   function fitCategoryBanners(root) {
     root.querySelectorAll('.cat-banner').forEach((banner) => {
       const img = banner.querySelector('.cat-banner-media img');
@@ -91,9 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!img.naturalWidth || !img.naturalHeight) return;
         const r = img.naturalWidth / img.naturalHeight;
         const clamped = Math.min(CAT_MAX_RATIO, Math.max(CAT_MIN_RATIO, r));
-        banner.style.setProperty('--cat-ratio', clamped.toFixed(3));
+        banner.style.setProperty('--cat-ratio', clamped.toFixed(4));
+        // ปกติกรอบ = สัดส่วนรูปพอดี (ไม่ crop) / ถ้าเกินขอบเขตที่กันไว้ใช้ contain เพื่อไม่ให้รูปโดนตัด
+        img.style.objectFit = (clamped === r) ? 'fill' : 'contain';
       };
-      if (img.complete) apply();
+      if (img.complete && img.naturalWidth) apply();
       img.addEventListener('load', apply);
     });
   }
