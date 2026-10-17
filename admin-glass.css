@@ -136,3 +136,58 @@ body .g-pagehead{padding-left:2px;padding-right:2px}
 html{-webkit-tap-highlight-color:transparent}
 body .d2-board>*,body .deck>.switch,.g-it{will-change:auto}
 @media (hover:none){body .is-tilting{transform:none}}
+
+/* ===================================================================
+   [2026-10-17] ปรับห้องแอดมิน: ปุ่มออกย้ายลงแท็บล่าง · เมนูฟังก์ชันเป็นไอคอนกลม · สวิตช์ปิด/เปิดเว็บแบบ iPhone
+   อนิเมชันของเมนูใช้ transform/opacity ล้วน (ตรรกะอยู่ท้าย admin-glass.js)
+   =================================================================== */
+/* ปุ่มออกเดิมที่หัวข้อ: ซ่อนไว้ (ยังอยู่ใน DOM ให้ admin.js ผูก event ได้) แล้วใช้ปุ่มในแท็บล่างแทน */
+body #logoutBtn{display:none}
+body .back-row{justify-content:center;min-height:58px}
+.g-dock button.g-out{color:#ff7b7b}
+.g-dock button.g-out:active{color:#ff4d4d}
+
+/* เมนูฟังก์ชัน: ไอคอนกลม + ป้ายข้อความ */
+body .d2-cat-cards{position:relative;gap:14px;padding:6px 2px 4px}
+body .d2-cat-cards .d2-fn-card{background:transparent;border:0;box-shadow:none;border-radius:0;padding:0;margin:0;display:flex;align-items:center;gap:14px;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent}
+body .d2-cat-cards .d2-fn-card:active,body .d2-cat-cards .d2-fn-card:hover{transform:none;border-color:transparent}
+body .d2-cat-cards .d2-fn-icon{width:56px;height:56px;border-radius:50%;flex:none;position:relative;z-index:2;transition:transform .4s var(--sp),box-shadow .4s ease}
+body .d2-cat-cards .d2-fn-icon svg{width:24px;height:24px}
+body .d2-cat-cards .d2-fn-card:active .d2-fn-icon{transform:scale(.9)}
+body .d2-cat-cards .d2-fn-card.g-me .d2-fn-icon{box-shadow:0 0 0 5px rgba(255,0,1,.24),inset 1.5px 1.5px 0 rgba(255,255,255,.45),0 10px 20px -8px rgba(0,0,0,.85)}
+body .d2-cat-cards .d2-fn-arrow{display:none}
+body .d2-cat-cards .d2-fn-text{flex:0 1 auto;min-width:0}
+body .d2-cat-cards .d2-fn-title{font-size:15px}
+body .d2-cat-cards .d2-fn-desc{font-size:11px}
+/* ตอนเลือกแล้ว: อีก 2 อันถูกถอดออกจาก layout ทันที (JS เล่นอนิเมชันเลื่อนซ้ายให้ผ่าน .g-ghost) */
+body .d2-cat-cards.g-picked .d2-fn-card:not(.g-me){display:none}
+body .d2-cat-cards.g-picked .d2-fn-card.g-ghost{display:flex;position:absolute;left:2px;right:2px;pointer-events:none}
+body .d2-cat-cards.g-picked .d2-fn-text{opacity:0}
+body .d2-cat-cards.g-picked .g-ghost .d2-fn-text{opacity:1}
+/* แผงที่เด้งออกมา (admin.js ย้าย .switch มาอยู่ใต้การ์ดของมันเอง) */
+body .d2-cat-cards>.switch:not(.open),body .deck>.switch:not(.open){display:none}
+body .d2-cat-cards>.switch,body .deck>.switch{animation:none;transition:none;margin:0}
+body .d2-cat-cards>.switch:hover,body .deck>.switch:hover{transform:none}
+body .d2-cat-cards>.switch.g-float{position:absolute;z-index:5}
+body .deck{position:relative}
+body .switch .switch-body{transition:none}
+body .switch.open .switch-body{max-height:none!important}
+body .switch.open .switch-body-inner{animation:none}
+
+/* การ์ดปิด/เปิดเว็บ: แถบสั้น = จุดสถานะ + สวิตช์ iPhone (ON เขียว = เว็บเปิดอยู่) */
+body .mt-card{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-radius:28px}
+body .mt-card .mt-info{flex:1;min-width:0}
+body .mt-card .mt-title{font-size:15px}
+body .mt-card .mt-sub{display:none}
+body .mt-card .mt-btn{flex:none;width:51px;height:31px;padding:0;border-radius:99px;position:relative;overflow:hidden;font-size:0;line-height:0;color:transparent;background:#34c759;border:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);transition:background .35s ease,opacity .2s;-webkit-tap-highlight-color:transparent}
+body .mt-card .mt-btn::after{content:"";position:absolute;top:2px;left:22px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.35),0 1px 1px rgba(0,0,0,.2);transition:left .4s cubic-bezier(.3,1.35,.5,1),width .25s ease}
+body .mt-card .mt-btn:active:not(:disabled){transform:none}
+body .mt-card .mt-btn:active:not(:disabled)::after{width:33px;left:16px}
+body .mt-card .mt-btn.is-open-action{background:#5a5a66}
+body .mt-card .mt-btn.is-open-action::after{left:2px}
+body .mt-card .mt-btn.is-open-action:active:not(:disabled)::after{left:2px}
+body .mt-card .mt-btn:disabled{opacity:.55}
+/* เช็กสถานะไม่ได้: โชว์เป็นปุ่ม "ลองใหม่" แทนสวิตช์ */
+body .mt-card.is-error .mt-btn{width:auto;min-width:76px;height:34px;padding:0 16px;font-size:13px;font-weight:800;line-height:34px;color:#fff;background:#6b6b7a}
+body .mt-card.is-error .mt-btn::after{display:none}
+@media (max-width:420px){body .mt-card{flex-direction:row;align-items:center}body .mt-card .mt-btn{width:51px}body .mt-card.is-error .mt-btn{width:auto}}
