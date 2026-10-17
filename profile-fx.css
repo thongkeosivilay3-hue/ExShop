@@ -385,3 +385,31 @@ html body .cat-banner{ aspect-ratio:var(--cat-ratio, 730 / 221); width:100%; max
 html body .cat-banner-media img{ max-width:100%; width:100%; height:100%; object-fit:cover; }
 html body .cat-meta{ min-width:0; }
 html body .cat-meta-text{ min-width:0; overflow:hidden; }
+
+
+/* =========================================================
+   รอยต่อระหว่างรูปกับตัวการ์ด: เบลอ/จางกลืนแทนเส้นตัด
+   - การ์ดหมวดหมู่ (.cat-banner -> .cat-meta)
+   - การ์ดสินค้า (.prod-media -> .prod-body)
+   ไล่สีจากโปร่งใส -> ขาว (สีเดียวกับพื้นการ์ดด้านล่าง) แบบ ease หลายจุด
+   จะได้ไม่เห็นเป็นแถบ ปรับความสูงของช่วงจางได้ที่ --edge-fade-h
+   ========================================================= */
+html body .cat-banner,
+html body .prod-card .prod-media{ --edge-fade-h:40%; }
+
+html body .cat-banner::after,
+html body .prod-card .prod-media::after,
+html body .prod-card .prod-media.is-paused::after,
+html body .prod-card .prod-media.is-soldout::after{
+  content:""; display:block; position:absolute; inset:auto 0 -1px 0;   /* -1px กันเส้นขาวบางๆ จากการปัดเศษพิกเซล */
+  height:var(--edge-fade-h); opacity:1; pointer-events:none; z-index:2;
+  background:linear-gradient(to bottom,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,.06) 18%,
+    rgba(255,255,255,.22) 38%,
+    rgba(255,255,255,.5) 58%,
+    rgba(255,255,255,.8) 78%,
+    rgba(255,255,255,.95) 92%,
+    #fff 100%);
+}
+html body .cat-meta{ position:relative; z-index:2; margin-top:-1px; }
