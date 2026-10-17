@@ -224,7 +224,15 @@ async function route(request, env, ctx) {
     }
 
     // path อื่นๆ ทั้งหมด -> เสิร์ฟไฟล์ static เดิม (index.html, style.css, script.js, ...)
-    return env.ASSETS.fetch(request);
+    const assetRes = await env.ASSETS.fetch(request);
+    // รูป/ฟอนต์/วิดีโอ เปลี่ยนนานๆ ครั้ง → ให้ browser เก็บไว้ 1 ชม. (และใช้ของเก่าไปก่อนได้อีก 1 วันขณะโหลดใหม่เบื้องหลัง)
+    // ผู้เข้าเว็บรอบสองจะไม่ต้องโหลดรูปซ้ำ  (css/js/html ไม่แตะ — ยังตรวจเวอร์ชันใหม่ทุกครั้งเหมือนเดิม)
+    if (assetRes.ok && /\.(png|jpe?g|webp|gif|svg|ico|avif|woff2?|ttf|otf|mp4|webm)$/i.test(url.pathname)) {
+      const out = new Response(assetRes.body, assetRes);
+      out.headers.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+      return out;
+    }
+    return assetRes;
   }
 }
 
@@ -1575,7 +1583,46 @@ async function getSoldCountsByProductName(env) {
    ตัวเลขคงเหลือเท่านั้น ไม่ใช่รหัสสินค้าจริง) แล้วคืนเป็น JSON ก้อนเดียวให้ทั้ง index.html
    และ category.html ใช้งาน (category.html กรองด้วย ?cat=1..4 เอาเองฝั่ง client จาก
    products[].category ที่ตรงกับ categories[].name) */
+// แคชคำตอบ storefront ไว้ในหน่วยความจำของ Worker แค่ 5 วินาที + รวมคำขอที่มาพร้อมกันให้เหลือ 1 ชุด
+// (เดิมทุกคนที่เปิดหน้าเว็บ = ยิง Supabase 8 คำสั่งใหม่ทุกครั้ง) — browser ยังได้ Cache-Control: no-store เหมือนเดิม
+// ข้อมูลที่แอดมินแก้ (รูป/ชื่อ/สต็อก) จะขึ้นหน้าเว็บช้าสุดไม่เกินค่านี้ ปรับได้ที่ STOREFRONT_CACHE_MS
+const STOREFRONT_CACHE_MS = 5000;
+const _sfCache = { at: 0, body: null, inflight: null };
+
+function storefrontJsonResponse(body, status) {
+  return new Response(body, {
+    status: status || 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  });
+}
+
 async function handlePublicStorefront(request, env) {
+  if (request.method !== 'GET') return handlePublicStorefrontUncached(request, env);
+
+  if (_sfCache.body && Date.now() - _sfCache.at < STOREFRONT_CACHE_MS) {
+    return storefrontJsonResponse(_sfCache.body, 200);
+  }
+
+  if (!_sfCache.inflight) {
+    _sfCache.inflight = (async () => {
+      const res = await handlePublicStorefrontUncached(request, env);
+      const body = await res.text();
+      if (res.status === 200) {
+        _sfCache.body = body;
+        _sfCache.at = Date.now();
+      }
+      return { status: res.status, body };
+    })().finally(() => { _sfCache.inflight = null; });
+  }
+
+  const out = await _sfCache.inflight;
+  return storefrontJsonResponse(out.body, out.status);
+}
+
+async function handlePublicStorefrontUncached(request, env) {
   if (request.method !== 'GET') {
     return json({ error: 'Method not allowed' }, 405);
   }
