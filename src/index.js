@@ -966,6 +966,12 @@ async function handlePasswordSignup(request, env) {
   }
 
   const authUser = createData;
+  // เก็บชื่อผู้ใช้ไว้ใน user_profiles (ใช้แสดงชื่อคนซื้อแบบปิดบังบางส่วนในหน้าแรก) — ล้มเหลวได้ ไม่กระทบการสมัคร
+  try {
+    await supabaseUpsert(env, 'user_profiles', 'user_id', { user_id: String(authUser.id), username, updated_at: new Date().toISOString() });
+  } catch (err) {
+    console.error('signup: เขียน user_profiles ไม่สำเร็จ', err);
+  }
   const sessionId = await createSession(env, {
     id: authUser.id,
     username,
@@ -1761,26 +1767,54 @@ async function handleRecentPurchases(request, env) {
     const visible = local.slice(0, 3);
     return (visible || local.slice(0, 1) || '?') + '***';
   }
+  function maskUsername(name) {
+    const chars = Array.from(String(name || '').trim());
+    if (!chars.length) return null;
+    return chars.slice(0, 3).join('') + '***';
+  }
 
   try {
+    const orderQuery = {
+      select: 'product_name,user_email,user_id,status,created_at',
+      status: 'eq.completed',
+      order: 'created_at.desc',
+      limit: String(LIMIT),
+    };
     const [orderRows, products] = await Promise.all([
-      supabaseSelect(env, 'orders', {
-        select: 'product_name,user_email,status,created_at',
-        status: 'eq.completed',
-        order: 'created_at.desc',
-        limit: String(LIMIT),
-      }),
+      // ถ้าตาราง orders ไม่มีคอลัมน์ user_id ให้ถอยกลับไปใช้ชุดเดิม (ไม่ให้ endpoint พัง)
+      supabaseSelect(env, 'orders', orderQuery).catch(() =>
+        supabaseSelect(env, 'orders', { ...orderQuery, select: 'product_name,user_email,status,created_at' })
+      ),
       supabaseSelect(env, 'products', {
         select: 'name,image_url',
       }),
     ]);
+
+    // บัญชีที่สมัครด้วยชื่อผู้ใช้ใช้อีเมลภายใน (hash) → ไปหาชื่อจริงจาก user_profiles ด้วย user_id
+    const nameById = new Map();
+    const ids = Array.from(new Set((orderRows || [])
+      .filter((o) => o.user_id && isInternalEmail(o.user_email))
+      .map((o) => String(o.user_id))));
+    if (ids.length) {
+      try {
+        const profs = await supabaseSelect(env, 'user_profiles', {
+          select: 'user_id,username',
+          user_id: `in.(${ids.map((x) => `"${x}"`).join(',')})`,
+        });
+        for (const r of profs || []) if (r.username) nameById.set(String(r.user_id), r.username);
+      } catch (err) {
+        console.error('recent-purchases: อ่าน user_profiles ไม่สำเร็จ', err);
+      }
+    }
 
     const imageByProductName = new Map((products || []).map((p) => [p.name, p.image_url || null]));
 
     const items = (orderRows || []).map((o) => ({
       productName: o.product_name || 'ສິນຄ້າ',
       image: imageByProductName.get(o.product_name) || null,
-      buyer: maskLocalPart(o.user_email),
+      buyer: isInternalEmail(o.user_email)
+        ? maskUsername(nameById.get(String(o.user_id)))
+        : maskLocalPart(o.user_email),
       createdAt: o.created_at,
     }));
 
