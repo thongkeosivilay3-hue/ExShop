@@ -373,3 +373,15 @@ html body:not(.is-home) header .login-btn{ pointer-events:auto; }
 html body:not(.is-home) .shell:has(> .oh-main, > .th-main, > .p-shell, > .page-back, > .page-nav){
   padding-top:12px;
 }
+
+
+/* =========================================================
+   การ์ดหมวดหมู่: ปรับความสูงอัตโนมัติตามรูป (storefront.js ตั้งค่า --cat-ratio
+   โดยจำกัดช่วงไว้) + กันล้นออกด้านข้าง
+   ========================================================= */
+html body .cat-stack{ min-width:0; max-width:100%; box-sizing:border-box; }
+html body .cat-item{ min-width:0; max-width:100%; width:100%; box-sizing:border-box; overflow:hidden; }
+html body .cat-banner{ aspect-ratio:var(--cat-ratio, 730 / 221); width:100%; max-width:100%; }
+html body .cat-banner-media img{ max-width:100%; width:100%; height:100%; object-fit:cover; }
+html body .cat-meta{ min-width:0; }
+html body .cat-meta-text{ min-width:0; overflow:hidden; }

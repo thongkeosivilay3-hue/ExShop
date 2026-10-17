@@ -78,6 +78,26 @@ document.addEventListener('DOMContentLoaded', () => {
       </a>`;
   }
 
+  // ປັບຄວາມສູງການ໌ດໝວດໝູ່ອັດຕະໂນມັດຕາມອັດຕາສ່ວນຂອງຮູບ (ພໍດີກັບຮູບ ບໍ່ຕັດບໍ່ຍືດ)
+  // ແຕ່ຈຳກັດໄວ້ບໍ່ໃຫ້ສູງເກີນ (CAT_MIN_RATIO) ຫຼືເຕ້ຍເກີນ (CAT_MAX_RATIO) -- ເກີນນັ້ນຈະ crop ແບບ cover
+  // ຖ້າຢາກໃຫ້ການ໌ດສູງຂຶ້ນ/ຕ່ຳລົງ ໃຫ້ແກ້ສອງຄ່ານີ້ (ກວ້າງ ÷ ສູງ)
+  const CAT_MIN_RATIO = 2.8;   // ສູງສຸດ = ກວ້າງ / 2.8
+  const CAT_MAX_RATIO = 4.2;   // ຕ່ຳສຸດ = ກວ້າງ / 4.2
+  function fitCategoryBanners(root) {
+    root.querySelectorAll('.cat-banner').forEach((banner) => {
+      const img = banner.querySelector('.cat-banner-media img');
+      if (!img) return;
+      const apply = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        const r = img.naturalWidth / img.naturalHeight;
+        const clamped = Math.min(CAT_MAX_RATIO, Math.max(CAT_MIN_RATIO, r));
+        banner.style.setProperty('--cat-ratio', clamped.toFixed(3));
+      };
+      if (img.complete) apply();
+      img.addEventListener('load', apply);
+    });
+  }
+
   function renderCategories(data) {
     stack.innerHTML = data.categories.map((category) => {
       const products = window.StorefrontData.productsByCategoryName(data, category.name);
@@ -88,6 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ອານິເມຊັນ "ຄ່ອຍໆເຫັນ" ຕອນເລື່ອນລົງມາ (ຄືເກົ່າ ໃນ script.js) — ຕ້ອງຕິດຕັ້ງໃໝ່ ເພາະ
     // script.js ໄດ້ observe ໄປແລ້ວກ່ອນກາຕູນເຫຼົ່ານີ້ຈະຖືກສ້າງ (ດຶງຂໍ້ມູນແບບ async)
+    fitCategoryBanners(stack);
+
     const catItems = stack.querySelectorAll('.cat-item');
     if (catItems.length && 'IntersectionObserver' in window) {
       const revealObserver = new IntersectionObserver((entries) => {
