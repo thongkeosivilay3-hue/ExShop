@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const couponBox = document.getElementById('couponBox');
   const couponMsg = document.getElementById('couponMsg');
   const totalOld = document.getElementById('totalOld');
+  const discChip = document.getElementById('discChip');
+  const balNow = document.getElementById('balNow');
+  const balAfter = document.getElementById('balAfter');
+  const balBox = document.getElementById('balBox');
 
   if (!window.StorefrontData || !pid) {
     showError('ບໍ່ພົບສິນຄ້ານີ້ (ລິ້ງບໍ່ຖືກຕ້ອງ)');
@@ -205,6 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let qty = 1;
   let coupon = null;          // { code, type: 'percent'|'fixed', value, remaining } ຫຼັງ validate ຜ່ານ
   let couponChecking = false;
+  let walletBalance = null;   // null = ຍັງບໍ່ໄດ້ login / ຍັງໂຫຼດບໍ່ສຳເລັດ
+  let couponPreview = null;   // ຜົນກວດໂຄ້ດທີ່ພິມຢູ່ (ຍັງບໍ່ກົດ "ໃຊ້ໂຄ້ດ") { code, type, value, remaining } | { code, error }
+  let previewTimer = null;
+  let lastPayable = 0;
+  const CHARGE_MULT = 1000;   // ຕ້ອງກົງກັບ v_mult ໃນ purchase_product (SQL)
 
   function formatKip(n) { return window.StorefrontData.formatKip(n); }
 
@@ -262,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     coupon = null;
     couponInput.value = '';
     couponInput.readOnly = false;
+    couponPreview = null;
     if (!silent) setCouponMsg('', '');
     renderSummary();
   }
@@ -328,19 +338,107 @@ document.addEventListener('DOMContentLoaded', () => {
   couponInput.addEventListener('input', () => {
     couponInput.value = couponInput.value.replace(/[^A-Za-z0-9_-]/g, '').toUpperCase();
     if (couponMsg.classList.contains('err')) setCouponMsg('', '');
+    schedulePreview();
   });
   couponInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); if (!coupon) applyCoupon(); }
   });
 
+
+  /* ---------- ຍອດເງິນ + ຍອດຄົງເຫຼືອຫຼັງຊື້ ---------- */
+  function renderBalance() {
+    if (walletBalance === null) {
+      const next = encodeURIComponent(window.location.pathname + window.location.search);
+      balNow.innerHTML = `<a href="/login.html?next=${next}">ເຂົ້າສູ່ລະບົບ</a>`;
+      balNow.className = 'bal-v';
+      balAfter.textContent = '—';
+      balAfter.className = 'bal-v';
+      return;
+    }
+    balNow.textContent = formatKip(walletBalance);
+    balNow.className = 'bal-v';
+    // ລາຄາໃນລະບົບເປັນຫົວໜ່ວຍພັນ — ຝັ່ງຖານຂໍ້ມູນ (purchase_product) ຫັກເງິນຈິງ x1000 ສະເໝີ
+    const left = walletBalance - lastPayable * CHARGE_MULT;
+    if (left >= 0) {
+      balAfter.textContent = formatKip(left);
+      balAfter.className = 'bal-v ok';
+    } else {
+      balAfter.textContent = `ຂາດ ${formatKip(-left)}`;
+      balAfter.className = 'bal-v low';
+    }
+  }
+
+  async function loadBalance() {
+    try {
+      const res = await fetch('/api/me', { cache: 'no-store' });
+      const data = await res.json().catch(() => ({}));
+      walletBalance = data && data.loggedIn && data.user ? (Number(data.user.balance) || 0) : null;
+    } catch (e) { walletBalance = null; }
+    renderBalance();
+  }
+
+  /* ---------- ພຣີວິວສ່ວນຫຼຸດ (ພິມໂຄ້ດແລ້ວ ຍັງບໍ່ກົດ "ໃຊ້ໂຄ້ດ") ----------
+     ໃຊ້ /api/coupons/validate ເດີມ — endpoint ນີ້ "ບໍ່ນັບສິດ" ຈຶ່ງຍິງເບິ່ງລ່ວງໜ້າໄດ້ປອດໄພ */
+  function previewOffFor(p) {
+    const unitPrice = currentDuration() ? currentDuration().price : 0;
+    const v = Number(p.value) || 0;
+    const per = Math.max(0, Math.min(p.type === 'percent' ? Math.round(unitPrice * Math.min(v, 100) / 100) : v, unitPrice));
+    return per * Math.max(0, Math.min(qty, Number(p.remaining) || 0));
+  }
+
+  function renderDiscChip() {
+    const setChip = (cls, text) => {
+      discChip.className = 'disc-chip' + (cls ? ' ' + cls : '');
+      discChip.textContent = text;
+    };
+    if (coupon) {
+      const off = discountPerUnit(currentDuration() ? currentDuration().price : 0) * couponUnits();
+      setChip('', off > 0 ? `ລົດ −${formatKip(off)}` : 'ໃຊ້ໂຄ້ດແລ້ວ');
+      return;
+    }
+    const typed = couponInput.value.trim().toUpperCase();
+    if (!typed || !couponPreview || couponPreview.code !== typed) {
+      if (typed && /^[A-Z0-9_-]{2,32}$/.test(typed) && couponPreview !== false) setChip('pending', 'ກຳລັງກວດໂຄ້ດ...');
+      else discChip.className = 'disc-chip u-hidden';
+      return;
+    }
+    if (couponPreview.error) { setChip('err', couponPreview.error); return; }
+    const off = previewOffFor(couponPreview);
+    setChip('', off > 0 ? `ຈະລົດໄດ້ −${formatKip(off)}` : 'ໂຄ້ດນີ້ໃຊ້ໄດ້');
+  }
+
+  function schedulePreview() {
+    clearTimeout(previewTimer);
+    const typed = couponInput.value.trim().toUpperCase();
+    couponPreview = null;
+    if (coupon || !/^[A-Z0-9_-]{2,32}$/.test(typed)) { renderDiscChip(); return; }
+    renderDiscChip();
+    previewTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/coupons/validate', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: typed }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (couponInput.value.trim().toUpperCase() !== typed || coupon) return; // ພິມຕໍ່ແລ້ວ/ໃຊ້ໂຄ້ດແລ້ວ
+        if (res.status === 401 || data.requireLogin) couponPreview = { code: typed, error: 'ກະລຸນາລ໋ອກອິນກ່ອນ' };
+        else if (!res.ok || !data.ok) couponPreview = { code: typed, error: data.error || 'ໂຄ້ດບໍ່ຖືກຕ້ອງ' };
+        else couponPreview = { code: typed, type: data.type === 'percent' ? 'percent' : 'fixed', value: Number(data.value) || 0, remaining: Math.max(0, Number(data.remaining) || 0) };
+      } catch (e) { couponPreview = { code: typed, error: 'ເຊື່ອມຕໍ່ບໍ່ໄດ້' }; }
+      renderDiscChip();
+    }, 600);
+  }
+
   function renderBadges() {
-    const stock = currentDuration() ? currentDuration().stock : 0;
+    // ສະຕັອກລວມ = ສະຕັອກທຸກຕົວເລືອກ/ໄລຍະເວລາລວມກັນ (ບໍ່ແມ່ນສະເພາະຕົວທີ່ເລືອກ)
+    const stock = window.StorefrontData.productTotalStock(product);
     const parts = [];
     parts.push(`<span class="badge"><span class="dot"></span>ໝວດ: ${escapeHtml(product.category || '')}</span>`);
     if (product.paused) {
       parts.push(`<span class="badge out"><span class="dot"></span>ຢຸດຂາຍຊົ່ວຄາວ${product.paused_note ? ' — ' + escapeHtml(product.paused_note) : ''}</span>`);
     } else if (stock > 0) {
-      parts.push(`<span class="badge ready"><span class="dot"></span>ພ້ອມສົ່ງ</span>`);
+      parts.push(`<span class="badge ready"><span class="dot"></span>ມີທັງໝົດ <b class="en">${stock}</b> ອັນ</span>`);
     } else {
       parts.push(`<span class="badge out"><span class="dot"></span>ບໍ່ພ້ອມຂາຍ</span>`);
     }
@@ -397,13 +495,16 @@ document.addEventListener('DOMContentLoaded', () => {
     priceValue.textContent = formatKip(price);
     const fullTotal = price * qty;
     const couponOff = discountPerUnit(price) * couponUnits();
-    totalValue.textContent = formatKip(Math.max(0, fullTotal - couponOff));
+    lastPayable = Math.max(0, fullTotal - couponOff);
+    totalValue.textContent = formatKip(lastPayable);
     if (totalOld) {
       totalOld.textContent = formatKip(fullTotal);
       totalOld.classList.toggle('u-hidden', couponOff <= 0);
     }
     qtyValue.textContent = qty;
     renderCouponState();
+    renderBalance();
+    renderDiscChip();
 
     const buyable = !product.paused && stock > 0;
     if (!buyable) {
@@ -479,6 +580,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  loadBalance();
 
   window.StorefrontData.fetchData()
     .then((data) => {

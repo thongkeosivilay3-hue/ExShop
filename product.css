@@ -314,3 +314,80 @@ hr.div{ border:none; border-top:1px solid var(--card-border); margin:20px 16px 0
   display:flex; align-items:center; justify-content:center; margin-bottom:14px;
 }
 .cs-err-ring svg{ width:24px; height:24px; stroke:var(--red); }
+
+/* -------- ຍອດເງິນ + ສ່ວນຫຼຸດ (ໜ້າສັ່ງຊື້) -------- */
+.price-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:26px; }
+.price-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+.disc-chip{
+  font-size:12px; font-weight:800; color:var(--green);
+  background:rgba(46,204,113,.10); border:1px solid rgba(46,204,113,.35);
+  padding:4px 10px; border-radius:999px; white-space:nowrap;
+}
+.disc-chip.pending{ color:var(--text-dim); background:var(--bg-raise); border-color:var(--card-border); }
+.disc-chip.err{ color:var(--red); background:rgba(255,0,1,.07); border-color:rgba(255,0,1,.25); }
+.bal-box{
+  margin-left:auto; text-align:right; min-width:132px;
+  background:var(--bg-raise); border:1px solid var(--card-border);
+  border-radius:12px; padding:7px 11px; font-size:12px;
+}
+.bal-line{ display:flex; justify-content:space-between; gap:10px; line-height:1.7; }
+.bal-k{ color:var(--text-faint); font-weight:600; }
+.bal-v{ color:var(--text); font-weight:800; }
+.bal-v.ok{ color:var(--green); }
+.bal-v.low{ color:var(--red); }
+.bal-box a{ color:var(--red); font-weight:800; text-decoration:underline; }
+
+/* -------- ຕົວເລືອກສິນຄ້າ (ດີໄຊນ໌ໃໝ່ — ຍັງເປັນກາດຍາວເຕັມແຖວ) -------- */
+.opt-list{ gap:12px; }
+.opt-card{
+  align-items:center; gap:12px; padding:14px 14px 14px 16px;
+  border-radius:18px; border:1.5px solid var(--card-border);
+  background:var(--bg-raise); box-shadow:0 2px 10px rgba(30,70,120,.06);
+  position:relative; overflow:hidden;
+  transition:transform .15s, box-shadow .2s, border-color .2s, background .2s, color .2s;
+}
+.opt-card:active:not(:disabled){ transform:scale(.985); }
+.opt-card.selected{
+  border-color:transparent !important; color:#fff !important;  /* !important: theme.css [class*="-card"] ທັບຢູ່ */
+  background:linear-gradient(120deg,var(--red) 0%,var(--red-deep) 100%) !important;
+  box-shadow:0 8px 22px rgba(47,155,232,.38);
+}
+.opt-card.selected::after{
+  content:""; position:absolute; right:-30px; top:-40px; width:120px; height:120px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.28),transparent 70%); pointer-events:none;
+}
+.opt-name-wrap{ padding:0; gap:6px; }
+.opt-name{ font-size:15.5px; }
+.opt-card.selected .opt-name{ color:#fff; }
+.opt-check{ width:22px; height:22px; border-radius:50%; flex:none; }
+.opt-card.selected .opt-check{ background:#fff; border-color:#fff; }
+.opt-card.selected .opt-check svg{ stroke:var(--red-deep); }
+.opt-meta{
+  align-self:flex-start; padding:3px 9px; border-radius:999px;
+  background:rgba(47,155,232,.10); color:var(--red-deep); font-weight:700;
+}
+.opt-card.selected .opt-meta{ background:rgba(255,255,255,.22); color:#fff; }
+.opt-divider{ display:none; }
+.opt-price{
+  width:auto; padding:8px 14px; border-radius:12px; font-size:15px; font-weight:900;
+  color:var(--red-deep); background:rgba(47,155,232,.12);
+}
+.opt-card.selected .opt-price{ color:#fff; background:rgba(255,255,255,.22); }
+
+/* -------- ອະນິເມຊັນຕອນກົດເລືອກຕົວເລືອກ -------- */
+@keyframes optPop{ 0%{transform:scale(.96)} 55%{transform:scale(1.025)} 100%{transform:scale(1)} }
+@keyframes optShine{ from{transform:translateX(-120%) skewX(-20deg)} to{transform:translateX(320%) skewX(-20deg)} }
+@keyframes optPricePop{ 0%{transform:scale(.7);opacity:.4} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1)} }
+@keyframes optRing{ 0%{box-shadow:0 0 0 0 rgba(47,155,232,.55)} 100%{box-shadow:0 0 0 14px rgba(47,155,232,0)} }
+.opt-card:not(:disabled):active{ transform:scale(.96); }
+.opt-card.selected{ animation:optPop .42s cubic-bezier(.34,1.56,.64,1), optRing .6s ease-out; }
+.opt-card.selected::before{
+  content:""; position:absolute; top:0; bottom:0; left:0; width:38%; pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+  animation:optShine .75s ease-out .05s 1 both;
+}
+.opt-card.selected .opt-price{ animation:optPricePop .45s cubic-bezier(.34,1.56,.64,1) .08s both; }
+.opt-card.selected .opt-check{ animation:optPricePop .4s cubic-bezier(.34,1.56,.64,1) both; }
+@media (prefers-reduced-motion: reduce){
+  .opt-card.selected, .opt-card.selected::before, .opt-card.selected .opt-price, .opt-card.selected .opt-check{ animation:none; }
+}
