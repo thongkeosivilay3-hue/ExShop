@@ -17,6 +17,7 @@
 
 <link href="theme.css?v=20261016a" rel="stylesheet"/>
 <link href="profile-fx.css?v=20261017d" rel="stylesheet"/>
+<link href="bestsellers.css?v=1" rel="stylesheet"/>
 <link href="fat-font.css?v=20261017a" rel="stylesheet"/>
 </head>
 <body class="is-home">
@@ -75,22 +76,20 @@
 <div><div class="stat-label">ຂາຍແລ້ວ</div><div class="stat-value">0<span class="unit">ຊິ້ນ</span></div></div>
 </div>
 </div>
-<!-- Why choose us -->
-<section class="section">
-<div class="section-title u-mb-16">ເປັນຫຍັງຕ້ອງເລືອກ <span class="cat"> <span class="brand-name-inline"></span></span></div>
-<div class="why-card">
-<div class="why-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z"></path></svg></div>
-<div>
-<div class="why-title">ປອດໄພ ແລະ ໄວ</div>
-<div class="why-text">ໃສ່ໃຈຄຸນນະພາບຂອງສິນຄ້າ ແລະ ບໍລິການ ດ້ວຍລະບົບຮັກສາຄວາມປອດໄພທີ່ທັນສະໄໝ ພ້ອມການບໍລິການທີ່ວ່ອງໄວ ແລະ ເຊື່ອຖືໄດ້ຕະຫຼອດ 24 ຊົ່ວໂມງ</div>
+<!-- Best sellers (ສິນຄ້າຂາຍດີ) — สร้างโดย bestsellers.js -->
+<section class="section bs-section" id="bsSection" hidden>
+<div class="bs-head">
+<div class="bs-ico"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg></div>
+<div class="bs-ttl">
+<div class="bs-t">ຂາຍດີປະຈຳອາທິດ</div>
+<div class="bs-s">ສິນຄ້າຂາຍດີທີ່ລູກຄ້າເລືອກຫຼາຍທີ່ສຸດ</div>
 </div>
+<a class="bs-all" href="#categories">ເບິ່ງທັງໝົດ</a>
 </div>
-<div class="why-card">
-<div class="why-icon"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3v5Z"></path><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5Z"></path></svg></div>
-<div>
-<div class="why-title">ບໍລິການລູກຄ້າ</div>
-<div class="why-text">ທີມງານມືອາຊີບພ້ອມໃຫ້ຄຳປຶກສາ ແລະ ແກ້ໄຂບັນຫາຕະຫຼອດ 24 ຊົ່ວໂມງ ດ້ວຍໃຈທີ່ໃສ່ໃຈໃນທຸກລາຍລະອຽດ ເພື່ອຄວາມພໍໃຈສູງສຸດຂອງລູກຄ້າ</div>
-</div>
+<div class="bs-wrap">
+<div class="bs-track" id="bsTrack"></div>
+<button aria-label="ກ່ອນໜ້າ" class="bs-nav bs-prev" type="button"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg></button>
+<button aria-label="ຖັດໄປ" class="bs-nav bs-next" type="button"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"></path></svg></button>
 </div>
 </section>
 <!-- Recent purchases (ซ่อนตอนเปิดโหมดแจ้งเตือนเลื่อน — คุมโดย purchase-toast.js) -->
@@ -139,6 +138,7 @@
 <script src="page-transition.js"></script>
 <script src="storefront-data.js"></script>
 <script src="storefront.js?v=20261017d"></script>
+<script src="bestsellers.js?v=1"></script>
 <script src="recent-purchases.js"></script>
 <script src="purchase-toast.js?v=20261017a"></script>
 <script src="promo-popup.js"></script>
