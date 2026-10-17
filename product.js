@@ -347,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- ຍອດເງິນ + ຍອດຄົງເຫຼືອຫຼັງຊື້ ---------- */
   function renderBalance() {
+    if (!balNow || !balAfter) return; // ກ່ອງຍອດເງິນຖືກລຶບອອກຈາກໜ້າແລ້ວ
     if (walletBalance === null) {
       const next = encodeURIComponent(window.location.pathname + window.location.search);
       balNow.innerHTML = `<a href="/login.html?next=${next}">ເຂົ້າສູ່ລະບົບ</a>`;
