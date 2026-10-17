@@ -429,3 +429,14 @@ html body .shell > *{ min-width:0; }
 html body .shell > footer{ margin-top:auto; flex-shrink:0; }
 html body .shell > :has(+ footer){ margin-bottom:40px; }
 html body .shell > .legal-wrap{ width:100%; }   /* เดิมใช้ margin:auto เลยหดในแนวนอนเมื่ออยู่ใน flex */
+
+
+/* =========================================================
+   ซ่อนโลโก้ + ชื่อร้าน + ไอคอนโซเชียล (Discord ฯลฯ) ในส่วนท้ายหน้า ทุกหน้า
+   เหลือไว้แค่บรรทัดลิขสิทธิ์ / ความเป็นส่วนตัว
+   (ซ่อนด้วย CSS — ถ้าอยากเอากลับมา ลบบล็อกนี้ทิ้งได้เลย)
+   ========================================================= */
+html body footer .footer-logo,
+html body footer .fname,
+html body footer .fsocial{ display:none !important; }
+html body footer{ padding-top:20px; }
