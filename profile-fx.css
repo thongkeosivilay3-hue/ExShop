@@ -362,3 +362,14 @@ html body:not(.is-home) header::after{ display:none; }
 html body:not(.is-home) header .brand{ visibility:hidden; opacity:0; pointer-events:none; }
 html body:not(.is-home) header .login-btn{ pointer-events:auto; }
 
+
+
+/* =========================================================
+   ลดช่องว่างด้านบนของหน้าที่มีหัวข้อ/ปุ่มย้อนกลับอยู่ฝั่งซ้าย
+   (ประวัติการสั่งซื้อ, ประวัติเติมเงิน, โปรไฟล์, หมวดหมู่, สินค้า)
+   เดิมเว้น 96px เผื่อแถบโลโก้ แต่หน้าอื่นซ่อนโลโก้แล้ว เหลือแค่ปุ่มโปรไฟล์ขวาบน
+   -> ดันเนื้อหาขึ้นชิดขอบบน ให้ปุ่มโปรไฟล์ลอยอยู่ข้างๆ หัวข้อ
+   ========================================================= */
+html body:not(.is-home) .shell:has(> .oh-main, > .th-main, > .p-shell, > .page-back, > .page-nav){
+  padding-top:12px;
+}
