@@ -40,7 +40,7 @@
   var rnd=function(a,b){return a+Math.random()*(b-a)};
   // ฟองอากาศพื้นหลัง
   var bb=document.createElement('div'); bb.className='fx-bubbles';
-  for(var i=0;i<10;i++){ var b=document.createElement('i'), s=rnd(14,46);
+  for(var i=0;i<16;i++){ var b=document.createElement('i'), s=rnd(16,52);
     b.style.cssText='left:'+rnd(2,96)+'%;width:'+s+'px;height:'+s+'px;--t:'+rnd(14,26)+'s;--dl:'+(-rnd(0,20))+'s;--dx:'+rnd(-40,40)+'px'; bb.appendChild(b); }
   document.body.appendChild(bb);
   // ฮีโร่: วงแสง + ออร์บ + ประกาย

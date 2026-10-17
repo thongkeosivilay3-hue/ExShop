@@ -15,7 +15,7 @@
   --ease:cubic-bezier(.22,1,.36,1);
 }
 html{ background:#f3f8fd; scroll-behavior:smooth; }
-html body{ background:var(--bg); color:var(--text); font-family:'Noto Sans Lao','Rajdhani',sans-serif; }
+html body{ background:transparent; color:var(--text); font-family:'Noto Sans Lao','Rajdhani',sans-serif; }
 html .shell{ background:transparent; }
 html body::before,html body::after{ content:""; position:fixed; z-index:-1; pointer-events:none; border-radius:50%; filter:blur(70px); }
 html body::before{ width:420px; height:420px; top:-140px; right:-120px; background:radial-gradient(circle,#b9e0fb,transparent 70%); animation:blobA 16s ease-in-out infinite alternate; }
@@ -235,8 +235,8 @@ html .stat-card::before{ display:none !important; }
 @property --ring{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
 /* ฟองอากาศลอยขึ้นพื้นหลัง */
 .fx-bubbles{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
-.fx-bubbles i{ position:absolute; bottom:-60px; border-radius:50%; border:1.5px solid rgba(47,155,232,.28);
-  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.95),rgba(140,203,247,.18) 60%,transparent 70%);
+.fx-bubbles i{ position:absolute; bottom:-60px; border-radius:50%; border:1.5px solid rgba(47,155,232,.5); box-shadow:inset 0 0 10px rgba(140,203,247,.45),0 0 12px rgba(140,203,247,.35);
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.95),rgba(140,203,247,.32) 60%,transparent 70%);
   animation:rise var(--t,16s) linear var(--dl,0s) infinite; }
 @keyframes rise{ 0%{ transform:translate(0,0) scale(.8); opacity:0; } 10%{ opacity:1; } 50%{ transform:translate(var(--dx,20px),-55vh) scale(1); }
   100%{ transform:translate(calc(var(--dx,20px)*-1),-115vh) scale(1.1); opacity:0; } }
